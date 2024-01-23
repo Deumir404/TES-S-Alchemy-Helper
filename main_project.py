@@ -24,7 +24,7 @@ if (start):
     button_setting.pack(fill=X, padx=[40,40])
     button_about = ttk.Button(text="About", command=click_start)
     button_about.pack(fill=X, padx=[40,40])
-    button_exit = ttk.Button(text="Exit", command=click_start)
+    button_exit = ttk.Button(text="K", command=click_start)
     button_exit.pack(fill=X, padx=[40,40])
 
 if (main_menu):

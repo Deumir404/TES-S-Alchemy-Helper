@@ -66,7 +66,7 @@ class main_page(QDialog):
             layout.addWidget(list_form[i])
         # Set dialog layout
         self.setLayout(layout)
-
+#git
 
 if __name__ == '__main__':
     # Create the Qt Application

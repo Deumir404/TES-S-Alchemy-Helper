@@ -2,10 +2,47 @@ import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
-    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem )
+    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow)
 from PySide6.QtCore import Qt
 
-
+class Form_perk(QDialog):
+    def __init__(self, parent=None):
+        super(Form_perk, self).__init__(parent)
+        # Create widgets
+        self.label_alchemist = QLabel("Алхимик")
+        self.edit_alchemist = QLineEdit()
+        self.label_healer = QLabel("Целитель")
+        self.edit_healer = QLineEdit()
+        self.label_pharmacist = QLabel("Провизор(Фармацевт)")
+        self.edit_pharmacist = QLineEdit()
+        self.label_poisoner = QLabel("Отравитель")
+        self.edit_poisoner = QLineEdit()
+        self.label_purity = QLabel("Чистота")
+        self.edit_purity = QLineEdit()
+        # Create layout and add widgets
+        layout_alchemist =QHBoxLayout()
+        layout_alchemist.addWidget(self.label_alchemist)
+        layout_alchemist.addWidget(self.edit_alchemist)
+        layout_healer =QHBoxLayout()
+        layout_healer.addWidget(self.label_healer)
+        layout_healer.addWidget(self.edit_healer)
+        layout_pharmacist =QHBoxLayout()
+        layout_pharmacist.addWidget(self.label_pharmacist)
+        layout_pharmacist.addWidget(self.edit_pharmacist)
+        layout_poisoner =QHBoxLayout()
+        layout_poisoner.addWidget(self.label_poisoner)
+        layout_poisoner.addWidget(self.edit_poisoner)
+        layout_purity =QHBoxLayout()
+        layout_purity.addWidget(self.label_purity)
+        layout_purity.addWidget(self.edit_purity)
+        layout = QVBoxLayout()
+        layout.addLayout(layout_alchemist)
+        layout.addLayout(layout_healer)
+        layout.addLayout(layout_pharmacist)
+        layout.addLayout(layout_poisoner)
+        layout.addLayout(layout_purity)
+        # Set dialog layout
+        self.setLayout(layout)
 class Form_property(QDialog):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
@@ -73,13 +110,23 @@ class main_page(QDialog):
         super(main_page, self).__init__(parent)
         # Create widgets
         layout = QHBoxLayout()
-        for i in range(3):
+        for i in range(2):
             layout.addWidget(list_form[i])
         # Set dialog layout
-        layout_vertical = QVBoxLayout()
-        layout_vertical.addLayout(layout)
-        layout_vertical.addWidget(list_form[3])
-        self.setLayout(layout_vertical)
+        layout_vertical_potion = QVBoxLayout()
+        layout_vertical_potion.addLayout(layout)
+        layout_vertical_potion.addWidget(list_form[3])
+        layout_vertical_inv = QVBoxLayout()
+        label_inv = QLabel("Инвентарь")
+        label_skill = QLabel("Перки")
+        layout_vertical_inv.addWidget(label_skill)
+        layout_vertical_inv.addWidget(list_form[4])
+        layout_vertical_inv.addWidget(label_inv)
+        layout_vertical_inv.addWidget(list_form[2])
+        True_layout = QHBoxLayout()
+        True_layout.addLayout(layout_vertical_inv)
+        True_layout.addLayout(layout_vertical_potion)
+        self.setLayout(True_layout)
 class Table_potion(QDialog):
     def __init__(self, parent=None):
         super(Table_potion, self).__init__(parent)
@@ -107,9 +154,9 @@ class Table_potion(QDialog):
                     string_property += "\n"
             item_prop = QTableWidgetItem(string_property)
             item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
-            item.setFlags(Qt.ItemFlag.ItemIsEditable)
-            item_prop.setFlags(Qt.ItemFlag.ItemIsEditable)
-            item_sum.setFlags(Qt.ItemFlag.ItemIsEditable)
+            item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
             self.table.setItem(i,0, item)
             self.table.setItem(i,1, item_prop)
             self.table.setItem(i,2, item_sum)
@@ -166,14 +213,29 @@ class Table_inv(QDialog):
         if self.table.item(item.row(), 0).text() in List_inv :
             List_inv.remove(self.table.item(item.row(), 0).text()) 
         self.update_table(List_inv)
-        
+class Window(QMainWindow): 
+    def __init__(self): 
+        super().__init__() 
+  
+        # setting title 
+        self.setWindowTitle("Python ") 
+  
+        # setting geometry 
+        self.setGeometry(100, 100, 600, 400) 
+  
+        # calling method 
+        self.showMaximized() 
+  
+        # showing all the widgets 
+        self.show() 
 
 
 
 
 if __name__ == '__main__':
     # Create the Qt Application
-    app = QApplication([])
+    app = QApplication(sys.argv)
+    app.setApplicationName("TES:S alchemy helper")
     #inventory list
     List_inv = []
     List_prop_dict = []
@@ -182,9 +244,11 @@ if __name__ == '__main__':
     search_ingredient = Form_ingredient()
     Search_property = Form_property()
     Table_p = Table_potion()
+    Form_skill = Form_perk()
     Table_in = Table_inv(List_inv)
-    list_widget = [search_ingredient, Search_property, Table_in, Table_p]
+    list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
     Layout = main_page(list_widget)
-    Layout.show()
     # Run the main Qt loop
+    main_menu = Window()
+    main_menu.setCentralWidget(Layout)
     sys.exit(app.exec())

@@ -72,8 +72,9 @@ class Form_property(QDialog):
             self.List_result.addItems(list_result)
     def add_ingredients(self):
         item = self.List_result.currentItem()
-        if item.text() not in List_inv:
-            List_inv.append(item.text())
+        item_with_amount = [item.text(), 1]
+        if item_with_amount not in List_inv:
+            List_inv.append(item_with_amount)
             Table_in.update_table(List_inv)
 class Form_ingredient(QDialog):
     def __init__(self, parent=None):
@@ -96,8 +97,9 @@ class Form_ingredient(QDialog):
         self.List_result.itemDoubleClicked.connect(self.add_ingredients)
     def add_ingredients(self):
         item = self.List_result.currentItem()
-        if item.text() not in List_inv:
-            List_inv.append(item.text())
+        item_with_amount = [item.text(), 1]
+        if item_with_amount not in List_inv:
+            List_inv.append(item_with_amount)
             Table_in.update_table(List_inv)
     def result(self):
         self.List_result.clear()
@@ -146,23 +148,23 @@ class Table_potion(QDialog):
         self.table.clear()
         self.table.setColumnCount(5)
         self.table.setRowCount(len(list))
-
         for i in range(len(list)):
-            item = QTableWidgetItem("Зелье " + list[i]["name"])
-            item_list = Search_by_property(list[i]["name"])
-            string_property = str()
-            for j in range(len(item_list)):
-                string_property = string_property + item_list[j]
-                if j != len(item_list)-1:      
-                    string_property += "\n"
-            item_prop = QTableWidgetItem(string_property)
-            item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
-            item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-            item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-            item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-            self.table.setItem(i,0, item)
-            self.table.setItem(i,1, item_prop)
-            self.table.setItem(i,3, item_sum)
+            if list[i]["sum"] > 1:
+                item = QTableWidgetItem("Зелье " + list[i]["name"])
+                item_list = Search_by_property(list[i]["name"])
+                string_property = str()
+                for j in range(len(item_list)):
+                    string_property = string_property + item_list[j]
+                    if j != len(item_list)-1:      
+                        string_property += "\n"
+                item_prop = QTableWidgetItem(string_property)
+                item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
+                item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                self.table.setItem(i,0, item)
+                self.table.setItem(i,1, item_prop)
+                self.table.setItem(i,3, item_sum)
 
         self.table.resizeColumnToContents(1)
         self.table.resizeRowsToContents()  
@@ -178,7 +180,8 @@ class Table_inv(QDialog):
         layout.addWidget(self.table)
         # Set dialog layout
         self.setLayout(layout)
-        self.table.itemDoubleClicked.connect(self.remove_item)  
+        self.table.itemDoubleClicked.connect(self.remove_item)
+        self.table.itemChanged.connect(self.change)  
     def update_table (self, list):
             self.table.clear()
             self.table.setColumnCount(3)
@@ -186,8 +189,8 @@ class Table_inv(QDialog):
             List_prop.clear()
             List_prop_dict.clear()
             for i in range(len(list)):
-                item = QTableWidgetItem(list[i])
-                item_property = search_by_ingredient(list[i])
+                item = QTableWidgetItem(list[i][0])
+                item_property = search_by_ingredient(list[i][0])
                 string_property = str()
                 for j in range(4):
                     string_property = string_property + item_property[1][j]
@@ -215,22 +218,31 @@ class Table_inv(QDialog):
     def remove_item (self):
         item = self.table.currentItem()
         if item.column() != 2:
-            if self.table.item(item.row(), 0).text() in List_inv :
-                List_inv.remove(self.table.item(item.row(), 0).text()) 
+            item_with_amount = [self.table.item(item.row(), 0).text(), List_inv[item.row()][1]]
+            if item_with_amount in List_inv:
+                List_inv.remove(item_with_amount)
             self.update_table(List_inv)
+    def change (self):
+        try:
+            item_row = self.table.currentItem()
+            item_row = item_row.row()
+            amount = int(self.table.item(item_row, 2).text())
+            List_inv[item_row][1] = amount
+            print(List_inv)
+        except AttributeError:
+            pass
+        except ValueError:
+            print("Введи нормальные значения")
+            self.table.editItem(item_row)
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
-  
         # setting title 
         self.setWindowTitle("TES:S alchemy helper") 
-  
         # setting geometry 
         self.setGeometry(100, 100, 600, 400) 
-  
         # calling method 
         self.showMaximized() 
-  
         # showing all the widgets 
         self.show() 
 

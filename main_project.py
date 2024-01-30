@@ -2,8 +2,9 @@ import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
-    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow)
-from PySide6.QtCore import Qt
+    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+from PySide6.QtCore import Qt , QSize
+import colorama
 
 class Form_perk(QDialog):
     def __init__(self, parent=None):
@@ -118,14 +119,16 @@ class main_page(QDialog):
         layout_vertical_potion.addWidget(list_form[3])
         layout_vertical_inv = QVBoxLayout()
         label_inv = QLabel("Инвентарь")
-        label_skill = QLabel("Перки")
+        label_skill = QLabel("Навыки")
         layout_vertical_inv.addWidget(label_skill)
         layout_vertical_inv.addWidget(list_form[4])
         layout_vertical_inv.addWidget(label_inv)
         layout_vertical_inv.addWidget(list_form[2])
-        True_layout = QHBoxLayout()
-        True_layout.addLayout(layout_vertical_inv)
-        True_layout.addLayout(layout_vertical_potion)
+        True_layout = QGridLayout()
+        True_layout.setColumnStretch(1, 0)
+        True_layout.setColumnStretch(2, 1)
+        True_layout.addLayout(layout_vertical_inv, 1, 1)
+        True_layout.addLayout(layout_vertical_potion, 1, 2)
         self.setLayout(True_layout)
 class Table_potion(QDialog):
     def __init__(self, parent=None):
@@ -159,7 +162,7 @@ class Table_potion(QDialog):
             item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
             self.table.setItem(i,0, item)
             self.table.setItem(i,1, item_prop)
-            self.table.setItem(i,2, item_sum)
+            self.table.setItem(i,3, item_sum)
 
         self.table.resizeColumnToContents(1)
         self.table.resizeRowsToContents()  
@@ -200,25 +203,27 @@ class Table_inv(QDialog):
                     if j != 3:      
                         string_property += "\n"
                 item_prop = QTableWidgetItem(string_property)
+                item_sum = QTableWidgetItem("1")
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 self.table.setItem(i,0, item)
                 self.table.setItem(i,1, item_prop)
+                self.table.setItem(i,2, item_sum)
             self.table.resizeColumnToContents(1)
             self.table.resizeRowsToContents()
-            
             Table_p.fill_table(List_prop_dict)  
     def remove_item (self):
         item = self.table.currentItem()
-        if self.table.item(item.row(), 0).text() in List_inv :
-            List_inv.remove(self.table.item(item.row(), 0).text()) 
-        self.update_table(List_inv)
+        if item.column() != 2:
+            if self.table.item(item.row(), 0).text() in List_inv :
+                List_inv.remove(self.table.item(item.row(), 0).text()) 
+            self.update_table(List_inv)
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
   
         # setting title 
-        self.setWindowTitle("Python ") 
+        self.setWindowTitle("TES:S alchemy helper") 
   
         # setting geometry 
         self.setGeometry(100, 100, 600, 400) 

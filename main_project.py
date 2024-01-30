@@ -3,8 +3,14 @@ from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
     QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt , QSize
-import colorama
+from PySide6.QtCore import Qt 
+
+def count_above_two(dict):
+    count = 0
+    for i in range(len(dict)):
+        if dict[i]["sum"] > 1:
+            count += 1
+    return count
 
 class Form_perk(QDialog):
     def __init__(self, parent=None):
@@ -138,7 +144,6 @@ class Table_potion(QDialog):
         # Create widgets
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setRowCount(10)
         # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.table)
@@ -147,7 +152,8 @@ class Table_potion(QDialog):
     def fill_table(self, list):
         self.table.clear()
         self.table.setColumnCount(5)
-        self.table.setRowCount(len(list))
+        self.table.setRowCount(count_above_two(list))
+        correct_row = 0
         for i in range(len(list)):
             if list[i]["sum"] > 1:
                 item = QTableWidgetItem("Зелье " + list[i]["name"])
@@ -162,9 +168,10 @@ class Table_potion(QDialog):
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                self.table.setItem(i,0, item)
-                self.table.setItem(i,1, item_prop)
-                self.table.setItem(i,3, item_sum)
+                self.table.setItem(correct_row,0, item)
+                self.table.setItem(correct_row,1, item_prop)
+                self.table.setItem(correct_row,3, item_sum)
+                correct_row += 1
 
         self.table.resizeColumnToContents(1)
         self.table.resizeRowsToContents()  
@@ -243,7 +250,8 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 600, 400) 
         # calling method 
         self.showMaximized() 
-        # showing all the widgets 
+        # showing all the widgets
+        self.setCentralWidget(Layout) 
         self.show() 
 
 
@@ -252,7 +260,6 @@ class Window(QMainWindow):
 if __name__ == '__main__':
     # Create the Qt Application
     app = QApplication(sys.argv)
-    app.setApplicationName("TES:S alchemy helper")
     #inventory list
     List_inv = []
     List_prop_dict = []
@@ -267,5 +274,4 @@ if __name__ == '__main__':
     Layout = main_page(list_widget)
     # Run the main Qt loop
     main_menu = Window()
-    main_menu.setCentralWidget(Layout)
     sys.exit(app.exec())

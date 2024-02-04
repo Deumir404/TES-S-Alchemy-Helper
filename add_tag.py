@@ -1,0 +1,31 @@
+# coding: UTF-8
+#1 - провизор
+#2 - отравитель
+#3 - провизор + целитель
+
+import json
+
+def write_json(data, filename= 'poison_basic.json'):
+    with open(filename, 'a+', encoding= "UTF-8") as file:
+        json.dump(data, file, indent=2, ensure_ascii=False)
+
+def Search_by_property(text):
+        dict_1 = []
+        list_dict = []
+        with open("poison_with_tag.json", 'r', encoding= "UTF-8") as file:
+                file_content = file.read()
+                dict_1.append(json.loads(file_content))
+        for i in range(len(dict_1[0])):
+                name = dict_1[0][i].get("name_potion")
+                properties = dict_1[0][i].get("description")
+                print(name)
+                print(properties)
+                tag1 = dict_1[0][i].get("tag")
+                data = dict(name_potion = name, description = properties, tag = tag1)
+                print(data)
+                list_dict.append(data)
+        write_json(list_dict)
+                
+
+
+Search_by_property(3)

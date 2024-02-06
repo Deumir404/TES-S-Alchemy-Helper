@@ -1,7 +1,7 @@
 import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
-from search_description_potion import Search_by_name_potion, Search_by_name_poison
+from search_description_potion import get_description
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
     QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt 
@@ -164,12 +164,10 @@ class Table_potion(QDialog):
                     string_property = string_property + item_list[j]
                     if j != len(item_list)-1:      
                         string_property += "\n"
-                discription = str(Search_by_name_potion(list[i]["name"]))
-                if discription == "Описание не найдено":
-                    discription = str(Search_by_name_poison(list[i]["name"]))
+                description = str(get_description(list[i]["name"],1,0,0,0,0))
                 item_prop = QTableWidgetItem(string_property)
                 item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
-                item_disctiption = QTableWidgetItem(discription)
+                item_disctiption = QTableWidgetItem(description)
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_disctiption.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)

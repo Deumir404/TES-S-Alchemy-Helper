@@ -12,7 +12,6 @@ def get_description(text, lvl, alchemy, healer,farma,poison):
             if text.lower() == dict_1[0][i].get("name_potion").lower():
                 list = dict_1[0][i].get("description").split("{power}")
                 tag = dict_1[0][i].get("tag")
-                print(tag)
                 basic = dict_1[0][i].get("power")
                 power = math_stat(tag, basic, lvl, alchemy, healer, farma, poison)
                 if len(list) == 2:

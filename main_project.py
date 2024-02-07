@@ -2,7 +2,7 @@ import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from search_description_potion import get_description
-from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
+from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
     QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt 
 
@@ -12,22 +12,53 @@ def count_above_two(dict):
         if dict[i]["sum"] > 1:
             count += 1
     return count
+def sort_comparator(list):
+    return list[1]
+def get_amount(list, name):
+    sort_list = []
+    for i in range(len(list)):
+        list_property = search_by_ingredient(list[i][0])
+        for j in range(4):
+            if list_property[1][j] == name:
+                sort_list.append(list[i])
+    sort_list.sort(key=sort_comparator)
+    sum = 0
+    for i in range(len(sort_list)-1):
+        if sort_list[i+1][1] - sort_list[i][1] >= 0:
+            sort_list[i+1][1] - sort_list[i][1]
+            sum += sort_list[i][1]
+        else:
+            return sum
+    return sum
+
 
 class Form_perk(QDialog):
     def __init__(self, parent=None):
         super(Form_perk, self).__init__(parent)
         # Create widgets
+        self.label_alchemy = QLabel("Уровень алхимии")
+        self.edit_alchemy = QLineEdit("15")
         self.label_alchemist = QLabel("Алхимик")
-        self.edit_alchemist = QLineEdit()
+        self.edit_alchemist = QComboBox()
+        list_alchemist = ["0","1","2","3","4","5"]
+        self.edit_alchemist.addItems(list_alchemist)
         self.label_healer = QLabel("Целитель")
-        self.edit_healer = QLineEdit()
+        List_bool = ["0","1"]
+        self.edit_healer = QComboBox()
+        self.edit_healer.addItems(List_bool)
         self.label_pharmacist = QLabel("Провизор(Фармацевт)")
-        self.edit_pharmacist = QLineEdit()
+        self.edit_pharmacist = QComboBox()
+        self.edit_pharmacist.addItems(List_bool)
         self.label_poisoner = QLabel("Отравитель")
-        self.edit_poisoner = QLineEdit()
+        self.edit_poisoner = QComboBox()
+        self.edit_poisoner.addItems(List_bool)
         self.label_purity = QLabel("Чистота")
-        self.edit_purity = QLineEdit()
+        self.edit_purity = QComboBox()
+        self.edit_purity.addItems(List_bool)
         # Create layout and add widgets
+        layout_alchemy =QHBoxLayout()
+        layout_alchemy.addWidget(self.label_alchemy)
+        layout_alchemy.addWidget(self.edit_alchemy)
         layout_alchemist =QHBoxLayout()
         layout_alchemist.addWidget(self.label_alchemist)
         layout_alchemist.addWidget(self.edit_alchemist)
@@ -44,6 +75,7 @@ class Form_perk(QDialog):
         layout_purity.addWidget(self.label_purity)
         layout_purity.addWidget(self.edit_purity)
         layout = QVBoxLayout()
+        layout.addLayout(layout_alchemy)
         layout.addLayout(layout_alchemist)
         layout.addLayout(layout_healer)
         layout.addLayout(layout_pharmacist)
@@ -51,6 +83,29 @@ class Form_perk(QDialog):
         layout.addLayout(layout_purity)
         # Set dialog layout
         self.setLayout(layout)
+        #Привязываем редактирование навыков к функции
+        self.edit_alchemy.editingFinished.connect(self.change_perk)
+        self.edit_alchemist.currentIndexChanged.connect(self.change_perk)
+        self.edit_healer.currentIndexChanged.connect(self.change_perk)
+        self.edit_pharmacist.currentIndexChanged.connect(self.change_perk)
+        self.edit_poisoner.currentIndexChanged.connect(self.change_perk)
+        self.edit_purity.currentIndexChanged.connect(self.change_perk)
+    def change_perk(self):
+        try :
+            if int(self.edit_alchemy.text()) >= 0:
+                List_perk[0] = int(self.edit_alchemy.text())
+            else:
+                raise ValueError
+            List_perk[1] = self.edit_alchemist.currentIndex()
+            List_perk[2] = self.edit_healer.currentIndex()
+            List_perk[3] = self.edit_pharmacist.currentIndex()
+            List_perk[4] = self.edit_poisoner.currentIndex()
+            List_perk[5] = self.edit_purity.currentIndex()
+            Table_p.fill_table(List_prop_dict)
+        except ValueError:
+            print("Введите числовое значения")
+            self.edit_alchemy.setText("15")
+
 class Form_property(QDialog):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
@@ -164,9 +219,9 @@ class Table_potion(QDialog):
                     string_property = string_property + item_list[j]
                     if j != len(item_list)-1:      
                         string_property += "\n"
-                description = str(get_description(list[i]["name"],1,0,0,0,0))
+                description = str(get_description(list[i]["name"],List_perk[0],List_perk[1],List_perk[2],List_perk[3],List_perk[4]))
                 item_prop = QTableWidgetItem(string_property)
-                item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
+                item_sum = QTableWidgetItem(str(get_amount(List_inv, list[i]["name"])))
                 item_disctiption = QTableWidgetItem(description)
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
@@ -219,7 +274,7 @@ class Table_inv(QDialog):
                     if j != 3:      
                         string_property += "\n"
                 item_prop = QTableWidgetItem(string_property)
-                item_sum = QTableWidgetItem("1")
+                item_sum = QTableWidgetItem(str(list[i][1]))
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 self.table.setItem(i,0, item)
@@ -239,14 +294,17 @@ class Table_inv(QDialog):
         try:
             item_row = self.table.currentItem()
             item_row = item_row.row()
-            amount = int(self.table.item(item_row, 2).text())
+            if int(self.table.item(item_row, 2).text()) >= 0:
+                amount = int(self.table.item(item_row, 2).text())
+            else:
+                raise ValueError
             List_inv[item_row][1] = amount
-            print(List_inv)
+            Table_p.fill_table(List_prop_dict)
         except AttributeError:
             pass
         except ValueError:
             print("Введи нормальные значения")
-            self.table.editItem(item_row)
+            self.table.item(item_row, 2).setText("1")
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
@@ -270,6 +328,7 @@ if __name__ == '__main__':
     List_inv = []
     List_prop_dict = []
     List_prop = []
+    List_perk = [15,0,0,0,0,0]
     # Create and show the form
     search_ingredient = Form_ingredient()
     Search_property = Form_property()

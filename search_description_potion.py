@@ -1,7 +1,6 @@
 # coding: UTF-8
 import json
-
-import json
+from search_ingredient import search_by_ingredient
 
 def get_description(text, lvl, alchemy, healer,farma,poison):
         dict_1 = []
@@ -20,6 +19,24 @@ def get_description(text, lvl, alchemy, healer,farma,poison):
                     description = list[0]
                 return description
 
+def sort_comparator(list):
+    return list[1]
+def get_amount(list, name):
+    sort_list = []
+    for i in range(len(list)):
+        list_property = search_by_ingredient(list[i][0])
+        for j in range(4):
+            if list_property[1][j] == name:
+                sort_list.append(list[i])
+    sort_list.sort(key=sort_comparator)
+    sum = 0
+    for i in range(len(sort_list)-1):
+        if sort_list[i+1][1] - sort_list[i][1] >= 0:
+            sort_list[i+1][1] - sort_list[i][1]
+            sum += sort_list[i][1]
+        else:
+            return sum
+    return sum
     
 def math_stat(tag, num, lvl, alchemy, healer,farma,poison):
     if tag == 1:

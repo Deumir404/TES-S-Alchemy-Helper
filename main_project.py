@@ -1,10 +1,11 @@
 import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
-from search_description_potion import get_description
+from search_description_potion import get_description, get_amount
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
-    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt 
+    QVBoxLayout, QDialog, QTableWidget, QMenu,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction
 
 def count_above_two(dict):
     count = 0
@@ -12,24 +13,7 @@ def count_above_two(dict):
         if dict[i]["sum"] > 1:
             count += 1
     return count
-def sort_comparator(list):
-    return list[1]
-def get_amount(list, name):
-    sort_list = []
-    for i in range(len(list)):
-        list_property = search_by_ingredient(list[i][0])
-        for j in range(4):
-            if list_property[1][j] == name:
-                sort_list.append(list[i])
-    sort_list.sort(key=sort_comparator)
-    sum = 0
-    for i in range(len(sort_list)-1):
-        if sort_list[i+1][1] - sort_list[i][1] >= 0:
-            sort_list[i+1][1] - sort_list[i][1]
-            sum += sort_list[i][1]
-        else:
-            return sum
-    return sum
+
 
 
 class Form_perk(QDialog):
@@ -105,7 +89,6 @@ class Form_perk(QDialog):
         except ValueError:
             print("Введите числовое значения")
             self.edit_alchemy.setText("15")
-
 class Form_property(QDialog):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
@@ -189,8 +172,8 @@ class main_page(QDialog):
         layout_vertical_inv.addWidget(label_inv)
         layout_vertical_inv.addWidget(list_form[2])
         True_layout = QGridLayout()
-        True_layout.setColumnStretch(1, 0)
-        True_layout.setColumnStretch(2, 1)
+        True_layout.setColumnStretch(1, 1)
+        True_layout.setColumnStretch(2, 2)
         True_layout.addLayout(layout_vertical_inv, 1, 1)
         True_layout.addLayout(layout_vertical_potion, 1, 2)
         self.setLayout(True_layout)
@@ -241,7 +224,9 @@ class Table_inv(QDialog):
         super(Table_inv, self).__init__(parent)
         # Create widgets
         self.table = QTableWidget()
+        self.table.setStyleSheet("Background-color: rgb(251,239,213) ;")
         self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Название", "Свойства", "Количество"])
         self.table.setRowCount(len(list_ing))
         # Create layout and add widgets
         layout = QVBoxLayout()
@@ -253,6 +238,7 @@ class Table_inv(QDialog):
     def update_table (self, list):
             self.table.clear()
             self.table.setColumnCount(3)
+            self.table.setHorizontalHeaderLabels(["Название", "Свойства", "Количество"])
             self.table.setRowCount(len(list))
             List_prop.clear()
             List_prop_dict.clear()
@@ -311,9 +297,13 @@ class Window(QMainWindow):
         # setting title 
         self.setWindowTitle("TES:S alchemy helper") 
         # setting geometry 
-        self.setGeometry(100, 100, 600, 400) 
+        self.setGeometry(100, 100, 600, 400)
+        #self.setStyleSheet("Background-color: rgb(219,216,194);") 
         # calling method 
-        self.showMaximized() 
+        self.showMaximized()
+        menu = self.menuBar()
+        menu.addMenu("Справка")
+        menu.addMenu("Загрузка из файла")
         # showing all the widgets
         self.setCentralWidget(Layout) 
         self.show() 

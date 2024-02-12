@@ -4,7 +4,7 @@ from search_ingredient import search_by_ingredient
 from search_description_potion import get_description, get_amount
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
     QVBoxLayout, QDialog, QTableWidget,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap, QPalette
 
 def count_above_two(dict):
@@ -306,9 +306,9 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 600, 400)
         #self.setStyleSheet("Background-image: url(main_window.png);") 
         # calling method
-        bkgnd = QPixmap("main_window.png")
+        bkgnd = QPixmap("res/main_window.png")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
-        icon = QPixmap("main_icon.png")
+        icon = QPixmap("res/main_icon.png")
         icon.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         palette = QPalette()
         palette.setBrush(QPalette.ColorRole.Window, bkgnd)

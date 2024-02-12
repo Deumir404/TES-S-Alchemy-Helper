@@ -62,7 +62,7 @@ def math_power(tag, lvl, alchemy, healer,farma,poison):
     return power
 def get_description(text, lvl, alchemy, healer,farma,poison):
         dict_1 = []
-        with open("alchemy_with_tags.json", 'r', encoding= "UTF-8") as file:
+        with open("res/alchemy_with_tags.json", 'r', encoding= "UTF-8") as file:
                 file_content = file.read()
                 dict_1.append(json.loads(file_content))
         for i in range(len(dict_1[0])):

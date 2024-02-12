@@ -5,7 +5,7 @@ from selenium.webdriver.firefox.options import Options
 import time
 
 
-def write_json(data, filename= 'potion.json'):
+def write_json(data, filename= 'effect.json'):
     with open(filename, 'a+', encoding= "UTF-8") as file:
         json.dump(data, file, indent=2, ensure_ascii=False)
 
@@ -13,7 +13,7 @@ def write_json(data, filename= 'potion.json'):
 def get_url(url):
     # try :
         option1 = Options()
-        option1.add_argument("--headless")
+        #option1.add_argument("--headless")
         
 
         driver = webdriver.Firefox(options= option1)
@@ -21,24 +21,30 @@ def get_url(url):
         driver.implicitly_wait(30)
         #/html/body/div[4]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/div[2]/div/table/tbody/tr
         #/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/tbody/tr
+        #/html/body/div[1]/div[1]/div[1]/div[3]/div[4]/div/table[4]/tbody
         #/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/tbody/tr[1]/th/a
         #/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/tbody/tr[1]/td[1]
         #/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/thead/tr[1]/th/span
         #driver.find_element(By.XPATH, value = "/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/thead/tr[1]/th/span").click()
-        path = "/html/body/div[5]/div[4]/div[3]/main/div[3]/div[2]/div[1]/div[1]/table[5]/tbody/tr"
+        path = "/html/body/div[1]/div[1]/div[1]/div[3]/div[4]/div/table[4]/tbody/tr"
+        #/html/body/div[1]/div[1]/di
         rows = len(driver.find_elements(By.XPATH, value = path))
+        list = [3,4,5]
         print(rows-1)
-        row = driver.find_element(By.XPATH, value = path+ '[2]')
-        driver.execute_script("arguments[0].removeAttribute('style')", row)
+        #driver.execute_script("arguments[0].removeAttribute('style')", row)
         list_dict = []
-        for r in range(1, rows-1):
+        for r in range(1, rows):
             row = driver.find_element(By.XPATH, value = path+ '['+ str(r)+']')
-            driver.execute_script("arguments[0].removeAttribute('style')", row)
+            #driver.execute_script("arguments[0].removeAttribute('style')", row)
             name = driver.find_element(By.XPATH, value = path+ '['+ str(r)+']/th').text
-            properties = str()
-            
-            properties = driver.find_element(By.XPATH, value = path + '['+str(r)+']/td[1]').text
-            data = dict(name_potion = name, description = properties)
+            for i in list:
+                if i == 3:
+                    base_cost = driver.find_element(By.XPATH, value = path + '['+str(r)+']/td['+str(i)+']').text
+                if i == 4:
+                    base_power = driver.find_element(By.XPATH, value = path + '['+str(r)+']/td['+str(i)+']').text
+                if i == 5:
+                    base_duration = driver.find_element(By.XPATH, value = path + '['+str(r)+']/td['+str(i)+']').text
+            data = dict(name_potion = name, base_cost = base_cost, base_power =base_power, base_duration = base_duration)
             print(data)
             list_dict.append(data)
             print("complete "+str(r))
@@ -50,7 +56,7 @@ def get_url(url):
 
 def main():
     
-        url = "https://elderscrolls.fandom.com/ru/wiki/%D0%90%D0%BB%D1%85%D0%B8%D0%BC%D0%B8%D1%8F_(Skyrim)#%D0%9F%D1%80%D0%B8%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B7%D0%B5%D0%BB%D0%B8%D0%B9"
+        url = "https://en.uesp.net/wiki/Skyrim:Alchemy_Effects#Potion_Strengths"
         get_url(url)
         print("Complete")
         

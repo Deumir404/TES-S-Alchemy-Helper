@@ -3,9 +3,9 @@ from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from search_description_potion import get_description, get_amount
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
-    QVBoxLayout, QDialog, QTableWidget, QMenu,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction
+    QVBoxLayout, QDialog, QTableWidget,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QPixmap, QPalette
 
 def count_above_two(dict):
     count = 0
@@ -129,6 +129,7 @@ class Form_ingredient(QDialog):
         self.button = QPushButton("Поиск свойств")
         self.result_str = QLabel("Результаты")
         self.List_result = QListWidget()
+        self.result()
         # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.edit)
@@ -152,7 +153,7 @@ class Form_ingredient(QDialog):
         if type(list_result) is str:
             self.List_result.addItem(list_result)
         else :
-            self.List_result.addItem(list_result[0])
+            self.List_result.addItems(list_result)
 class main_page(QDialog):
     def __init__(self, list_form, parent=None):
         super(main_page, self).__init__(parent)
@@ -175,14 +176,16 @@ class main_page(QDialog):
         True_layout.setColumnStretch(1, 1)
         True_layout.setColumnStretch(2, 2)
         True_layout.addLayout(layout_vertical_inv, 1, 1)
-        True_layout.addLayout(layout_vertical_potion, 1, 2)
+        True_layout.addLayout(layout_vertical_potion, 1, 2) 
         self.setLayout(True_layout)
+
 class Table_potion(QDialog):
     def __init__(self, parent=None):
         super(Table_potion, self).__init__(parent)
         # Create widgets
         self.table = QTableWidget()
         self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
         # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.table)
@@ -191,6 +194,7 @@ class Table_potion(QDialog):
     def fill_table(self, list):
         self.table.clear()
         self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
         self.table.setRowCount(count_above_two(list))
         correct_row = 0
         for i in range(len(list)):
@@ -202,14 +206,17 @@ class Table_potion(QDialog):
                     string_property = string_property + item_list[j]
                     if j != len(item_list)-1:      
                         string_property += "\n"
-                description = str(get_description(list[i]["name"],List_perk[0],List_perk[1],List_perk[2],List_perk[3],List_perk[4]))
+                description = get_description(list[i]["name"],List_perk[0],List_perk[1],List_perk[2],List_perk[3],List_perk[4])
                 item_prop = QTableWidgetItem(string_property)
                 item_sum = QTableWidgetItem(str(get_amount(List_inv, list[i]["name"])))
-                item_disctiption = QTableWidgetItem(description)
+                item_disctiption = QTableWidgetItem(description[0])
+                item_cost = QTableWidgetItem(str(description[1]))
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_disctiption.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                item_cost.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                self.table.setItem(correct_row,4, item_cost)
                 self.table.setItem(correct_row,0, item)
                 self.table.setItem(correct_row,1, item_prop)
                 self.table.setItem(correct_row,2, item_disctiption)
@@ -224,7 +231,6 @@ class Table_inv(QDialog):
         super(Table_inv, self).__init__(parent)
         # Create widgets
         self.table = QTableWidget()
-        self.table.setStyleSheet("Background-color: rgb(251,239,213) ;")
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(["Название", "Свойства", "Количество"])
         self.table.setRowCount(len(list_ing))
@@ -298,9 +304,17 @@ class Window(QMainWindow):
         self.setWindowTitle("TES:S alchemy helper") 
         # setting geometry 
         self.setGeometry(100, 100, 600, 400)
-        #self.setStyleSheet("Background-color: rgb(219,216,194);") 
-        # calling method 
+        #self.setStyleSheet("Background-image: url(main_window.png);") 
+        # calling method
+        bkgnd = QPixmap("main_window.png")
+        bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
+        icon = QPixmap("main_icon.png")
+        icon.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
+        palette = QPalette()
+        palette.setBrush(QPalette.ColorRole.Window, bkgnd)
+        self.setPalette(palette)
         self.showMaximized()
+        self.setWindowIcon(icon)
         menu = self.menuBar()
         menu.addMenu("Справка")
         menu.addMenu("Загрузка из файла")

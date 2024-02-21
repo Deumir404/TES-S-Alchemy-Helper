@@ -1,10 +1,11 @@
 import sys
 from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
-from search_description_potion import get_description
-from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,
-    QVBoxLayout, QDialog, QTableWidget, QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt 
+from search_description_potion import get_description, get_amount
+from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
+    QVBoxLayout, QDialog, QTableWidget,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QPalette
 
 def count_above_two(dict):
     count = 0
@@ -13,21 +14,35 @@ def count_above_two(dict):
             count += 1
     return count
 
+
+
 class Form_perk(QDialog):
     def __init__(self, parent=None):
         super(Form_perk, self).__init__(parent)
         # Create widgets
+        self.label_alchemy = QLabel("Уровень алхимии")
+        self.edit_alchemy = QLineEdit("15")
         self.label_alchemist = QLabel("Алхимик")
-        self.edit_alchemist = QLineEdit()
+        self.edit_alchemist = QComboBox()
+        list_alchemist = ["0","1","2","3","4","5"]
+        self.edit_alchemist.addItems(list_alchemist)
         self.label_healer = QLabel("Целитель")
-        self.edit_healer = QLineEdit()
+        List_bool = ["0","1"]
+        self.edit_healer = QComboBox()
+        self.edit_healer.addItems(List_bool)
         self.label_pharmacist = QLabel("Провизор(Фармацевт)")
-        self.edit_pharmacist = QLineEdit()
+        self.edit_pharmacist = QComboBox()
+        self.edit_pharmacist.addItems(List_bool)
         self.label_poisoner = QLabel("Отравитель")
-        self.edit_poisoner = QLineEdit()
+        self.edit_poisoner = QComboBox()
+        self.edit_poisoner.addItems(List_bool)
         self.label_purity = QLabel("Чистота")
-        self.edit_purity = QLineEdit()
+        self.edit_purity = QComboBox()
+        self.edit_purity.addItems(List_bool)
         # Create layout and add widgets
+        layout_alchemy =QHBoxLayout()
+        layout_alchemy.addWidget(self.label_alchemy)
+        layout_alchemy.addWidget(self.edit_alchemy)
         layout_alchemist =QHBoxLayout()
         layout_alchemist.addWidget(self.label_alchemist)
         layout_alchemist.addWidget(self.edit_alchemist)
@@ -44,6 +59,7 @@ class Form_perk(QDialog):
         layout_purity.addWidget(self.label_purity)
         layout_purity.addWidget(self.edit_purity)
         layout = QVBoxLayout()
+        layout.addLayout(layout_alchemy)
         layout.addLayout(layout_alchemist)
         layout.addLayout(layout_healer)
         layout.addLayout(layout_pharmacist)
@@ -51,6 +67,28 @@ class Form_perk(QDialog):
         layout.addLayout(layout_purity)
         # Set dialog layout
         self.setLayout(layout)
+        #Привязываем редактирование навыков к функции
+        self.edit_alchemy.editingFinished.connect(self.change_perk)
+        self.edit_alchemist.currentIndexChanged.connect(self.change_perk)
+        self.edit_healer.currentIndexChanged.connect(self.change_perk)
+        self.edit_pharmacist.currentIndexChanged.connect(self.change_perk)
+        self.edit_poisoner.currentIndexChanged.connect(self.change_perk)
+        self.edit_purity.currentIndexChanged.connect(self.change_perk)
+    def change_perk(self):
+        try :
+            if int(self.edit_alchemy.text()) >= 0:
+                List_perk[0] = int(self.edit_alchemy.text())
+            else:
+                raise ValueError
+            List_perk[1] = self.edit_alchemist.currentIndex()
+            List_perk[2] = self.edit_healer.currentIndex()
+            List_perk[3] = self.edit_pharmacist.currentIndex()
+            List_perk[4] = self.edit_poisoner.currentIndex()
+            List_perk[5] = self.edit_purity.currentIndex()
+            Table_p.fill_table(List_prop_dict)
+        except ValueError:
+            print("Введите числовое значения")
+            self.edit_alchemy.setText("15")
 class Form_property(QDialog):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
@@ -91,6 +129,7 @@ class Form_ingredient(QDialog):
         self.button = QPushButton("Поиск свойств")
         self.result_str = QLabel("Результаты")
         self.List_result = QListWidget()
+        self.result()
         # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.edit)
@@ -114,7 +153,7 @@ class Form_ingredient(QDialog):
         if type(list_result) is str:
             self.List_result.addItem(list_result)
         else :
-            self.List_result.addItem(list_result[0])
+            self.List_result.addItems(list_result)
 class main_page(QDialog):
     def __init__(self, list_form, parent=None):
         super(main_page, self).__init__(parent)
@@ -134,17 +173,19 @@ class main_page(QDialog):
         layout_vertical_inv.addWidget(label_inv)
         layout_vertical_inv.addWidget(list_form[2])
         True_layout = QGridLayout()
-        True_layout.setColumnStretch(1, 0)
-        True_layout.setColumnStretch(2, 1)
+        True_layout.setColumnStretch(1, 1)
+        True_layout.setColumnStretch(2, 2)
         True_layout.addLayout(layout_vertical_inv, 1, 1)
-        True_layout.addLayout(layout_vertical_potion, 1, 2)
+        True_layout.addLayout(layout_vertical_potion, 1, 2) 
         self.setLayout(True_layout)
+
 class Table_potion(QDialog):
     def __init__(self, parent=None):
         super(Table_potion, self).__init__(parent)
         # Create widgets
         self.table = QTableWidget()
         self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
         # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.table)
@@ -153,6 +194,7 @@ class Table_potion(QDialog):
     def fill_table(self, list):
         self.table.clear()
         self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
         self.table.setRowCount(count_above_two(list))
         correct_row = 0
         for i in range(len(list)):
@@ -164,14 +206,17 @@ class Table_potion(QDialog):
                     string_property = string_property + item_list[j]
                     if j != len(item_list)-1:      
                         string_property += "\n"
-                description = str(get_description(list[i]["name"],1,0,0,0,0))
+                description = get_description(list[i]["name"],List_perk[0],List_perk[1],List_perk[2],List_perk[3],List_perk[4])
                 item_prop = QTableWidgetItem(string_property)
-                item_sum = QTableWidgetItem(str(list[i]["sum"]-1))
-                item_disctiption = QTableWidgetItem(description)
+                item_sum = QTableWidgetItem(str(get_amount(List_inv, list[i]["name"])))
+                item_disctiption = QTableWidgetItem(description[0])
+                item_cost = QTableWidgetItem(str(description[1]))
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_disctiption.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                item_cost.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                self.table.setItem(correct_row,4, item_cost)
                 self.table.setItem(correct_row,0, item)
                 self.table.setItem(correct_row,1, item_prop)
                 self.table.setItem(correct_row,2, item_disctiption)
@@ -187,6 +232,7 @@ class Table_inv(QDialog):
         # Create widgets
         self.table = QTableWidget()
         self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Название", "Свойства", "Количество"])
         self.table.setRowCount(len(list_ing))
         # Create layout and add widgets
         layout = QVBoxLayout()
@@ -198,6 +244,7 @@ class Table_inv(QDialog):
     def update_table (self, list):
             self.table.clear()
             self.table.setColumnCount(3)
+            self.table.setHorizontalHeaderLabels(["Название", "Свойства", "Количество"])
             self.table.setRowCount(len(list))
             List_prop.clear()
             List_prop_dict.clear()
@@ -219,7 +266,7 @@ class Table_inv(QDialog):
                     if j != 3:      
                         string_property += "\n"
                 item_prop = QTableWidgetItem(string_property)
-                item_sum = QTableWidgetItem("1")
+                item_sum = QTableWidgetItem(str(list[i][1]))
                 item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 self.table.setItem(i,0, item)
@@ -239,23 +286,38 @@ class Table_inv(QDialog):
         try:
             item_row = self.table.currentItem()
             item_row = item_row.row()
-            amount = int(self.table.item(item_row, 2).text())
+            if int(self.table.item(item_row, 2).text()) >= 0:
+                amount = int(self.table.item(item_row, 2).text())
+            else:
+                raise ValueError
             List_inv[item_row][1] = amount
-            print(List_inv)
+            Table_p.fill_table(List_prop_dict)
         except AttributeError:
             pass
         except ValueError:
             print("Введи нормальные значения")
-            self.table.editItem(item_row)
+            self.table.item(item_row, 2).setText("1")
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
         # setting title 
         self.setWindowTitle("TES:S alchemy helper") 
         # setting geometry 
-        self.setGeometry(100, 100, 600, 400) 
-        # calling method 
-        self.showMaximized() 
+        self.setGeometry(100, 100, 600, 400)
+        #self.setStyleSheet("Background-image: url(main_window.png);") 
+        # calling method
+        bkgnd = QPixmap("res/main_window.png")
+        bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
+        icon = QPixmap("res/main_icon.png")
+        icon.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
+        palette = QPalette()
+        palette.setBrush(QPalette.ColorRole.Window, bkgnd)
+        self.setPalette(palette)
+        self.showMaximized()
+        self.setWindowIcon(icon)
+        menu = self.menuBar()
+        menu.addMenu("Справка")
+        menu.addMenu("Загрузка из файла")
         # showing all the widgets
         self.setCentralWidget(Layout) 
         self.show() 
@@ -270,6 +332,7 @@ if __name__ == '__main__':
     List_inv = []
     List_prop_dict = []
     List_prop = []
+    List_perk = [15,0,0,0,0,0]
     # Create and show the form
     search_ingredient = Form_ingredient()
     Search_property = Form_property()

@@ -343,5 +343,4 @@ if __name__ == '__main__':
     Layout = main_page(list_widget)
     # Run the main Qt loop
     main_menu = Window()
-    print("hello World")
     sys.exit(app.exec())

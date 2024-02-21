@@ -306,7 +306,7 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 600, 400)
         #self.setStyleSheet("Background-image: url(main_window.png);") 
         # calling method
-        bkgnd = QPixmap("res/main_window.png")
+        bkgnd = QPixmap("res/main_window.jpg")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         icon = QPixmap("res/main_icon.png")
         icon.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
@@ -343,4 +343,5 @@ if __name__ == '__main__':
     Layout = main_page(list_widget)
     # Run the main Qt loop
     main_menu = Window()
+    print("hello World")
     sys.exit(app.exec())

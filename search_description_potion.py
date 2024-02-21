@@ -6,36 +6,7 @@ from search_ingredient import search_by_ingredient
 
 
 
-def math_stat(tag, num, lvl, alchemy, healer,farma,poison):
-    if tag == 1:
-        answer = round((num + round(lvl/10)) * (1 + 0.2 * alchemy) * (1 + 0.25 *farma))
-    if tag == 3:
-        answer = round((num + round(lvl/10)) * (1 + 0.2 * alchemy) * (1 + 0.25 *farma) * (1 + 0.25 * healer))
-    if tag == 4:  
-        answer = round((num + round(lvl/12.3)) * (1 + 0.2 * alchemy) * (1 + 0.25 *farma))
-        #недоработан
-    if tag == 5:
-        answer = round((num + round(lvl/50)) * (1 + 0.2 * alchemy) * (1 + 0.25 *farma))
-    if tag == 6:
-        answer = round((num + round(lvl/25)) * (1 + 0.2 * alchemy) * (1 + 0.25 *farma))
-    if tag == 7:
-        answer = round((num + round(lvl/12,3)) * (1 + 0.2 * alchemy))
-        #недоработан
-    if tag == 8:
-        answer = round((num + round(lvl/50)) * (1 + 0.2 * alchemy))
-    if tag == 9:
-        answer = round((num + round(lvl/50)) * (1 + 0.2 * alchemy) * (1 + 0.25 *poison))
-    if tag == 10:
-        answer = round((num + round(lvl/25)) * (1 + 0.2 * alchemy) * (1 + 0.25 *poison))
-    if tag == 11:
-        answer = round((num + round(lvl/12,3)) * (1 + 0.2 * alchemy))
-        #недоработан
-    if tag == 12:
-        answer = round((num + round(lvl/12,3)) * (1 + 0.2 * alchemy) * (1 + 0.25 *poison))
-        #недоработан
-    if tag == 2:
-        answer = round((num + round(lvl/10)) * (1 + 0.2 * alchemy) * (1 + 0.25 *poison))
-    return answer
+
 def get_healer(tag):
     if tag == 3:
         return 1
@@ -101,6 +72,7 @@ def get_description(text, lvl, alchemy, healer,farma,poison):
 def sort_comparator(list):
     return list[1]
 def get_amount(list, name):
+    #есть баг
     sort_list = []
     for i in range(len(list)):
         list_property = search_by_ingredient(list[i][0])

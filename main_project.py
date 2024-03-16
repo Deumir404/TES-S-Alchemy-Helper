@@ -3,9 +3,9 @@ from search_property import Search_by_property
 from search_ingredient import search_by_ingredient
 from search_description_potion import get_description, get_amount
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
-    QVBoxLayout, QDialog, QTableWidget,  QLabel, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+    QVBoxLayout, QDialog, QTableWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap, QPalette
+from PySide6.QtGui import QPixmap, QPalette, QAction
 
 def count_above_two(dict):
     count = 0
@@ -313,15 +313,45 @@ class Window(QMainWindow):
         palette = QPalette()
         palette.setBrush(QPalette.ColorRole.Window, bkgnd)
         self.setPalette(palette)
+        change_act = QAction("Сменить окно", self) 
+        change_act.triggered.connect(changer.change)
         self.showMaximized()
         self.setWindowIcon(icon)
-        menu = self.menuBar()
-        menu.addMenu("Справка")
-        menu.addMenu("Загрузка из файла")
+        self.menu = self.menuBar()
+        self.menu.addMenu("Справка")
+        self.menu.addMenu("Загрузка из файла")
+        self.menu.addAction(change_act)
         # showing all the widgets
-        self.setCentralWidget(Layout) 
+        self.setCentralWidget(changer)
         self.show() 
-
+        
+class game_page(QDialog):
+    def __init__(self, list_form, parent=None):
+        super(main_page, self).__init__(parent)
+        # Create widgets
+class Table_game(QDialog):
+    def __init__(self, parent=None):
+        super(Table_game, self).__init__(parent)
+        # Create widgets
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        # Create layout and add widgets
+        layout = QHBoxLayout()
+        layout.addWidget(self.table)
+        # Set dialog layout
+        self.setLayout(layout)
+        #self.table.setItem()
+class changer_page(QStackedWidget):
+    def __init__(self, list, parent=None):
+        super(changer_page, self).__init__(parent)
+        for i in range(len(list)):
+            self.addWidget(list[i])
+        self.setCurrentIndex(0)
+    def change(self):
+        if self.currentIndex()== 0:
+            self.setCurrentIndex(1)
+        else:
+            self.setCurrentIndex(0)
 
 
 
@@ -340,7 +370,14 @@ if __name__ == '__main__':
     Form_skill = Form_perk()
     Table_in = Table_inv(List_inv)
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
+    Table_ingredients = Table_game()
     Layout = main_page(list_widget)
+    Layout_game = QHBoxLayout()
+    Layout_game.addWidget(Table_ingredients)
+    Layout_game_page = QDialog()
+    Layout_game_page.setLayout(Layout_game)
+    List_page = [Layout, Layout_game_page]
+    changer = changer_page(List_page)
     # Run the main Qt loop
     main_menu = Window()
     sys.exit(app.exec())

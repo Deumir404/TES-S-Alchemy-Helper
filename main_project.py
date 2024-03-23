@@ -4,7 +4,7 @@ from search_ingredient import search_by_ingredient
 from search_description_potion import get_description, get_amount
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
     QVBoxLayout, QDialog, QTableWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QPalette, QAction
 
 def count_above_two(dict):
@@ -327,8 +327,12 @@ class Window(QMainWindow):
         
 class game_page(QDialog):
     def __init__(self, list_form, parent=None):
-        super(main_page, self).__init__(parent)
+        super(game_page, self).__init__(parent)
         # Create widgets
+        True_layout = QHBoxLayout()
+        True_layout.addWidget(list_form[0])
+        True_layout.addWidget(list_form[1])
+        self.setLayout(True_layout)
 class Table_game(QDialog):
     def __init__(self, parent=None):
         super(Table_game, self).__init__(parent)
@@ -340,7 +344,26 @@ class Table_game(QDialog):
         layout.addWidget(self.table)
         # Set dialog layout
         self.setLayout(layout)
-        #self.table.setItem()
+        self.fill_table()
+    def fill_table(self):
+        correct = 0
+        list_ingredients = search_by_ingredient("")
+        self.table.setRowCount(len(list_ingredients)//3+1)
+        for i in range(len(list_ingredients)//3+1):
+                for j in range(3):
+                    if correct == len(list_ingredients):
+                        break
+                    # ingredient_name = list_ingredients[correct]
+                    ingredient_image = QPixmap(f"res/image/{list_ingredients[correct]}.png")
+                    ingredient_image = ingredient_image.scaled(QSize(100,100), Qt.AspectRatioMode.KeepAspectRatio)
+                    # ingredient = QTableWidgetItem(ingredient_image, ingredient_name)
+                    ingredient = QLabel()
+                    ingredient.setTextFormat(Qt.TextFormat.RichText)
+                    ingredient.setText(f"<img src=\"res/image/{list_ingredients[correct]}.png\" width = \"155\" height = \"155\"> <br>{list_ingredients[correct]}</br>")
+                    correct = correct + 1
+                    self.table.setCellWidget(i,j,ingredient)
+                    self.table.resizeColumnsToContents()
+                    self.table.resizeRowsToContents()
 class changer_page(QStackedWidget):
     def __init__(self, list, parent=None):
         super(changer_page, self).__init__(parent)
@@ -370,12 +393,11 @@ if __name__ == '__main__':
     Form_skill = Form_perk()
     Table_in = Table_inv(List_inv)
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
-    Table_ingredients = Table_game()
     Layout = main_page(list_widget)
-    Layout_game = QHBoxLayout()
-    Layout_game.addWidget(Table_ingredients)
-    Layout_game_page = QDialog()
-    Layout_game_page.setLayout(Layout_game)
+    Table_ingredients = Table_game()
+    Table_ingredients_2 = Table_game()
+    List_game_widget = [Table_ingredients , Table_ingredients_2]
+    Layout_game_page = game_page(List_game_widget)
     List_page = [Layout, Layout_game_page]
     changer = changer_page(List_page)
     # Run the main Qt loop

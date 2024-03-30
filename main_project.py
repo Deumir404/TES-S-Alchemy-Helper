@@ -4,11 +4,11 @@ from search_ingredient import search_by_ingredient
 from search_description_potion import get_description, get_amount
 from test import get_property
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
-    QVBoxLayout, QDialog, QTableWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+    QVBoxLayout, QDialog, QTableWidget, QWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QPalette, QAction
 
-def count_above_two(dict):
+def count_above_one(dict):
     count = 0
     for i in range(len(dict)):
         if dict[i]["sum"] > 1:
@@ -17,7 +17,7 @@ def count_above_two(dict):
 
 
 
-class Form_perk(QDialog):
+class Form_perk(QWidget):
     def __init__(self, parent=None):
         super(Form_perk, self).__init__(parent)
         # Create widgets
@@ -90,7 +90,7 @@ class Form_perk(QDialog):
         except ValueError:
             print("Введите числовое значения")
             self.edit_alchemy.setText("15")
-class Form_property(QDialog):
+class Form_property(QWidget):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
         # Create widgets
@@ -122,7 +122,7 @@ class Form_property(QDialog):
         if item_with_amount not in List_inv:
             List_inv.append(item_with_amount)
             Table_in.update_table(List_inv)
-class Form_ingredient(QDialog):
+class Form_ingredient(QWidget):
     def __init__(self, parent=None):
         super(Form_ingredient, self).__init__(parent)
         # Create widgets
@@ -155,7 +155,7 @@ class Form_ingredient(QDialog):
             self.List_result.addItem(list_result)
         else :
             self.List_result.addItems(list_result)
-class Table_potion(QDialog):
+class Table_potion(QWidget):
     def __init__(self, parent=None):
         super(Table_potion, self).__init__(parent)
         # Create widgets
@@ -172,7 +172,7 @@ class Table_potion(QDialog):
         self.table.clear()
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
-        self.table.setRowCount(count_above_two(list))
+        self.table.setRowCount(count_above_one(list))
         correct_row = 0
         for i in range(len(list)):
             if list[i]["sum"] > 1:
@@ -188,22 +188,15 @@ class Table_potion(QDialog):
                 item_sum = QTableWidgetItem(str(get_amount(List_inv, list[i]["name"])))
                 item_disctiption = QTableWidgetItem(description[0])
                 item_cost = QTableWidgetItem(str(description[1]))
-                item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_disctiption.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_cost.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                self.table.setItem(correct_row,4, item_cost)
-                self.table.setItem(correct_row,0, item)
-                self.table.setItem(correct_row,1, item_prop)
-                self.table.setItem(correct_row,2, item_disctiption)
-                self.table.setItem(correct_row,3, item_sum)
+                list_items  = [item, item_prop, item_disctiption, item_sum, item_cost]
+                for i in range(len(list_items)):
+                    list_items[i].setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                    self.table.setItem(correct_row,i, list_items[i])
                 correct_row += 1
-
         self.table.resizeColumnToContents(1)
         self.table.resizeColumnToContents(2)
         self.table.resizeRowsToContents()  
-class Table_inv(QDialog):
+class Table_inv(QWidget):
     def __init__(self, list_ing, parent=None):
         super(Table_inv, self).__init__(parent)
         # Create widgets
@@ -275,9 +268,9 @@ class Table_inv(QDialog):
         except ValueError:
             print("Введи нормальные значения")
             self.table.item(item_row, 2).setText("1")
-class main_page(QDialog):
+class math_page(QWidget):
     def __init__(self, list_form, parent=None):
-        super(main_page, self).__init__(parent)
+        super(math_page, self).__init__(parent)
         # Create widgets
         layout = QHBoxLayout()
         for i in range(2):
@@ -300,7 +293,7 @@ class main_page(QDialog):
         True_layout.addLayout(layout_vertical_potion, 1, 2) 
         self.setLayout(True_layout)
 
-class mixing_game(QDialog):
+class mixing_game(QWidget):
     def __init__(self, parent=None):
         super(mixing_game, self).__init__(parent)
         goal = get_property()
@@ -311,14 +304,16 @@ class mixing_game(QDialog):
         self.image.setPixmap(QPixmap("res/table.jpg").scaled(QSize(400,400)))
         self.button_mix = QPushButton("Смешать")
         self.button_clear = QPushButton("Очистить выбор")
+        self.button_reset = QPushButton("Перезапуск")
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label_goal)
         self.layout.addWidget(self.label_attemp)
         self.layout.addWidget(self.image)
         self.layout.addWidget(self.button_mix)
         self.layout.addWidget(self.button_clear)
+        self.layout.addWidget(self.button_reset)
         self.setLayout(self.layout)
-class Table_game(QDialog):
+class Table_game(QWidget):
     def __init__(self, parent=None):
         super(Table_game, self).__init__(parent)
         # Create widgets
@@ -348,7 +343,7 @@ class Table_game(QDialog):
                     self.table.horizontalHeader().hide()
                     self.table.resizeColumnsToContents()
                     self.table.resizeRowsToContents()
-class game_page(QDialog):
+class game_page(QWidget):
     def __init__(self, list_form, parent=None):
         super(game_page, self).__init__(parent)
         # Create widgets
@@ -372,12 +367,7 @@ class changer_page(QStackedWidget):
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
-        # setting title 
         self.setWindowTitle("TES:S alchemy helper") 
-        # setting geometry 
-        self.setGeometry(100, 100, 600, 400)
-        #self.setStyleSheet("Background-image: url(main_window.png);") 
-        # calling method
         bkgnd = QPixmap("res/main_window.jpg")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         icon = QPixmap("res/main_icon.png")
@@ -413,7 +403,7 @@ if __name__ == '__main__':
     Form_skill = Form_perk()
     Table_in = Table_inv(List_inv)
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
-    Layout = main_page(list_widget)
+    Layout = math_page(list_widget)
     Table_ingredients = Table_game()
     Table_ingredients_2 = Table_game()
     Mix = mixing_game()

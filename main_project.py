@@ -15,6 +15,25 @@ def count_above_one(dict):
             count += 1
     return count
 
+def add_property(list, dict_for_write):
+    if len(dict_for_write) == 0 :
+        list_property = []
+    else :
+        list_property = []
+        for i in range(len(dict_for_write)):
+            if dict_for_write[i]["name"] not in list_property:
+                list_property.append(dict_for_write[i]["name"])
+    for j in range(4):
+                dict_item = dict(name = list[1][j], sum = 1)
+                if list[1][j] not in list_property:
+                    list_property.append(list[1][j])
+                    dict_for_write.append(dict_item)
+                else:
+                    for k in range(len(dict_for_write)):
+                        if dict_for_write[k]["name"] == dict_item["name"]:
+                            dict_for_write[k]["sum"] =  dict_for_write[k]["sum"] + 1
+                            break
+
 
 
 class Form_perk(QWidget):
@@ -296,15 +315,16 @@ class math_page(QWidget):
 class mixing_game(QWidget):
     def __init__(self, parent=None):
         super(mixing_game, self).__init__(parent)
-        goal = get_property()
+        self.goal = get_property()
         self.attemp = 5
-        self.label_goal = QLabel(f"Нужно смешать: \n Зелье {goal.lower()}")
+        self.label_goal = QLabel(f"Нужно смешать: \n Зелье {self.goal.lower()}")
         self.label_attemp = QLabel(f"Осталось попыток: {self.attemp}")
         self.image = QLabel()
         self.image.setPixmap(QPixmap("res/table.jpg").scaled(QSize(400,400)))
         self.button_mix = QPushButton("Смешать")
         self.button_clear = QPushButton("Очистить выбор")
         self.button_reset = QPushButton("Перезапуск")
+        
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label_goal)
         self.layout.addWidget(self.label_attemp)
@@ -313,10 +333,94 @@ class mixing_game(QWidget):
         self.layout.addWidget(self.button_clear)
         self.layout.addWidget(self.button_reset)
         self.setLayout(self.layout)
+        self.button_reset.clicked.connect(self.reset_game)
+        self.button_mix.clicked.connect(self.mix_ingredients)
+        self.button_clear.clicked.connect(self.clear_list)
+    def reset_game(self):
+        self.goal = get_property()
+        self.label_goal.setText(f"Нужно смешать: \n Зелье {self.goal.lower()}")
+        self.attemp = 5
+        self.label_attemp.setText(f"Осталось попыток: {self.attemp}")
+        self.clear_list()
+    def mix_ingredients(self):
+        Message = QLabel()
+        if 1 in Mix_ingedients or 0 in Mix_ingedients or (Mix_ingedients[0].text() == Mix_ingedients[1].text()):
+            Message_Text = "Пожалуйста, выберете 2  разных ингредиента"
+            Message_title = "Ошибка"
+            self.result = 0
+        else :
+            first_ingredient = Mix_ingedients[0].text().split("<br>")[1]
+            first_ingredient = first_ingredient.split("</br>")[0]
+            second_ingredient = Mix_ingedients[1].text().split("<br>")[1]
+            second_ingredient = second_ingredient.split("</br>")[0]
+            list_property_dict_game = []
+            item_property = search_by_ingredient(first_ingredient)
+            add_property(item_property, list_property_dict_game)
+            item_property = search_by_ingredient(second_ingredient)
+            add_property(item_property, list_property_dict_game)
+            Checker = count_above_one(list_property_dict_game)
+            if Checker == 0:
+                Message_Text = "У вас ничего не получилось"
+                Message_title = "Ошибка"
+                self.result = 1
+            elif Checker == 1:
+                for i in range(len(list_property_dict_game)):
+                    if list_property_dict_game[i]["sum"] > 1:
+                        prop = list_property_dict_game[i]["name"]
+                        break
+                Message_Text = f"У вас получилось зелье {prop.lower()}"
+                if self.goal == prop:
+                    Message_Text = Message_Text + "\n Вы сварили правильное зелье!!!"
+                    Message_title = "Победа"
+                    self.result = 2
+                else:
+                    Message_Text = Message_Text + "\n Но это неправильное зелье"
+                    Message_title = "Ошибка"
+                    self.result = 1
+            else:
+                prop = []
+                for i in range(len(list_property_dict_game)):
+                    if list_property_dict_game[i]["sum"] > 1:
+                        prop.append(list_property_dict_game[i]["name"])
+                Message_Text = "У вас получилось смешанное зелье со следующими эффектами: \n"
+                for i in range(len(prop)):
+                    Message_Text = Message_Text + f"{prop[i]} \n"
+                if self.goal in prop:
+                    Message_Text = Message_Text + "\n Вы сварили правильное зелье!!!"
+                    Message_title = "Победа"
+                    self.result = 2
+                else:
+                    Message_Text = Message_Text + "\n Но это неправильное зелье"
+                    Message_title = "Ошибка"
+                    self.result = 1
+        Message.setText(Message_Text)
+        Button_OK = QPushButton("OK")
+        Finish = QDialog()
+        Finish.setWindowTitle(Message_title)
+        layout_message = QVBoxLayout()
+        layout_message.addWidget(Message)
+        layout_message.addWidget(Button_OK)
+        Finish.setLayout(layout_message)
+        Button_OK.clicked.connect(Finish.accept)
+        Finish.finished.connect(self.finish_result)
+        Finish.exec()
+    def finish_result(self):
+        if self.result == 0 :
+            pass
+        elif self.result == 1:
+            self.attemp = self.attemp - 1
+            self.label_attemp.setText(f"Осталось попыток: {self.attemp}")
+        elif self.result == 2:
+            self.reset_game()
+    def clear_list(self):
+        Mix_ingedients[0] = 0
+        Mix_ingedients[1] = 1
+
 class Table_game(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, num, parent=None):
         super(Table_game, self).__init__(parent)
         # Create widgets
+        self.number = num
         self.table = QTableWidget()
         self.table.setColumnCount(3)
         # Create layout and add widgets
@@ -325,6 +429,7 @@ class Table_game(QWidget):
         # Set dialog layout
         self.setLayout(layout)
         self.fill_table()
+        self.table.cellDoubleClicked.connect(self.add_ingredients)
     def fill_table(self):
         correct = 0
         list_ingredients = search_by_ingredient("")
@@ -333,7 +438,6 @@ class Table_game(QWidget):
                 for j in range(3):
                     if correct == len(list_ingredients):
                         break
-                    # ingredient_name = list_ingredients[correct]
                     ingredient = QLabel()
                     ingredient.setTextFormat(Qt.TextFormat.RichText)
                     ingredient.setText(f"<img src=\"res/image/{list_ingredients[correct]}.png\" width = \"120\" height = \"120\"> <br>{list_ingredients[correct]}</br>")
@@ -343,6 +447,9 @@ class Table_game(QWidget):
                     self.table.horizontalHeader().hide()
                     self.table.resizeColumnsToContents()
                     self.table.resizeRowsToContents()
+    def add_ingredients(self):
+        item = self.table.currentIndex()
+        Mix_ingedients[self.number] = self.table.cellWidget(item.row(), item.column())
 class game_page(QWidget):
     def __init__(self, list_form, parent=None):
         super(game_page, self).__init__(parent)
@@ -404,8 +511,9 @@ if __name__ == '__main__':
     Table_in = Table_inv(List_inv)
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
     Layout = math_page(list_widget)
-    Table_ingredients = Table_game()
-    Table_ingredients_2 = Table_game()
+    Mix_ingedients = [0,1]
+    Table_ingredients = Table_game(0)
+    Table_ingredients_2 = Table_game(1)
     Mix = mixing_game()
     List_game_widget = [Table_ingredients ,  Mix, Table_ingredients_2]
     Layout_game_page = game_page(List_game_widget)

@@ -88,9 +88,3 @@ def get_amount(list, name):
         else:
             return sum
     return sum  
-
-     
-#1 - 16 10 - 17 20 - 18 30 - 18 40 - 19 50 - 20 60 - 21 70 - 22 80 - 22 90 -23 100 - 24
-
-
-            

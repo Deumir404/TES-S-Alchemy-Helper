@@ -324,11 +324,26 @@ class mixing_game(QWidget):
         self.button_mix = QPushButton("Смешать")
         self.button_clear = QPushButton("Очистить выбор")
         self.button_reset = QPushButton("Перезапуск")
-        
+        self.choice_ingredient = QHBoxLayout()
+        self.choice_ingredient.setSpacing(0)
+        self.first_ingredient = QLabel()
+        self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        self.second_ingredient = QLabel()
+        self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+        self.choice_ingredient.addWidget(self.first_ingredient)
+        Plus = QLabel("+")
+        Plus.setStyleSheet("font-size: 64px")
+        Plus.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.choice_ingredient.addWidget(Plus)
+        self.choice_ingredient.addWidget(self.second_ingredient)
+        self.choice_ingredient.setSpacing(0)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label_goal)
         self.layout.addWidget(self.label_attemp)
         self.layout.addWidget(self.image)
+        self.layout.addLayout(self.choice_ingredient)
         self.layout.addWidget(self.button_mix)
         self.layout.addWidget(self.button_clear)
         self.layout.addWidget(self.button_reset)
@@ -344,19 +359,16 @@ class mixing_game(QWidget):
         self.clear_list()
     def mix_ingredients(self):
         Message = QLabel()
-        if 1 in Mix_ingedients or 0 in Mix_ingedients or (Mix_ingedients[0].text() == Mix_ingedients[1].text()):
+        if "black" in Mix_ingedients or "black" in Mix_ingedients or (Mix_ingedients[0] == Mix_ingedients[1]):
             Message_Text = "Пожалуйста, выберете 2  разных ингредиента"
             Message_title = "Ошибка"
             self.result = 0
         else :
-            first_ingredient = Mix_ingedients[0].text().split("<br>")[1]
-            first_ingredient = first_ingredient.split("</br>")[0]
-            second_ingredient = Mix_ingedients[1].text().split("<br>")[1]
-            second_ingredient = second_ingredient.split("</br>")[0]
+            
             list_property_dict_game = []
-            item_property = search_by_ingredient(first_ingredient)
+            item_property = search_by_ingredient(Mix_ingedients[0])
             add_property(item_property, list_property_dict_game)
-            item_property = search_by_ingredient(second_ingredient)
+            item_property = search_by_ingredient(Mix_ingedients[1])
             add_property(item_property, list_property_dict_game)
             Checker = count_above_one(list_property_dict_game)
             if Checker == 0:
@@ -410,12 +422,30 @@ class mixing_game(QWidget):
         elif self.result == 1:
             self.attemp = self.attemp - 1
             self.label_attemp.setText(f"Осталось попыток: {self.attemp}")
+            if self.attemp == 0:
+                Message = QLabel("Вы проиграли!\n Попробуйте ещё раз")
+                Button_OK = QPushButton("OK")
+                Finish = QDialog()
+                Finish.setWindowTitle("Игра окончена")
+                layout_message = QVBoxLayout()
+                layout_message.addWidget(Message)
+                layout_message.addWidget(Button_OK)
+                Finish.setLayout(layout_message)
+                Button_OK.clicked.connect(Finish.accept)
+                Finish.finished.connect(self.finish_result)
+                Finish.exec()
+                self.reset_game()
         elif self.result == 2:
             self.reset_game()
     def clear_list(self):
-        Mix_ingedients[0] = 0
-        Mix_ingedients[1] = 1
-
+        Mix_ingedients[0] = "black"
+        Mix_ingedients[1] = "black"
+        self.reset_image()
+    def reset_image(self):
+        self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
 class Table_game(QWidget):
     def __init__(self, num, parent=None):
         super(Table_game, self).__init__(parent)
@@ -449,7 +479,10 @@ class Table_game(QWidget):
                     self.table.resizeRowsToContents()
     def add_ingredients(self):
         item = self.table.currentIndex()
-        Mix_ingedients[self.number] = self.table.cellWidget(item.row(), item.column())
+        ingredient = self.table.cellWidget(item.row(), item.column()).text().split("<br>")[1]
+        ingredient = ingredient.split("</br>")[0]
+        Mix_ingedients[self.number] = ingredient
+        Mix.reset_image()
 class game_page(QWidget):
     def __init__(self, list_form, parent=None):
         super(game_page, self).__init__(parent)
@@ -511,7 +544,7 @@ if __name__ == '__main__':
     Table_in = Table_inv(List_inv)
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
     Layout = math_page(list_widget)
-    Mix_ingedients = [0,1]
+    Mix_ingedients = ["black","black"]
     Table_ingredients = Table_game(0)
     Table_ingredients_2 = Table_game(1)
     Mix = mixing_game()

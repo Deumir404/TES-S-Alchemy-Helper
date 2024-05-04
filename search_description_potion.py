@@ -1,7 +1,7 @@
 # coding: UTF-8
 import json
 import math
-from search_ingredient import search_by_ingredient
+from search import search_by_ingredient
 
 
 

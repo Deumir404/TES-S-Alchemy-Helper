@@ -1,40 +1,14 @@
 import sys
-from search_property import Search_by_property
-from search_ingredient import search_by_ingredient
+from search import search_by_ingredient, Search_by_property
 from search_description_potion import get_description, get_amount
-from test import get_property
+from test import get_property, count_above_one, add_property, load_file, save_file
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
     QVBoxLayout, QDialog, QTableWidget, QWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QPixmap, QPalette, QAction
-
-def count_above_one(dict):
-    count = 0
-    for i in range(len(dict)):
-        if dict[i]["sum"] > 1:
-            count += 1
-    return count
-
-def add_property(list, dict_for_write):
-    if len(dict_for_write) == 0 :
-        list_property = []
-    else :
-        list_property = []
-        for i in range(len(dict_for_write)):
-            if dict_for_write[i]["name"] not in list_property:
-                list_property.append(dict_for_write[i]["name"])
-    for j in range(4):
-                dict_item = dict(name = list[1][j], sum = 1)
-                if list[1][j] not in list_property:
-                    list_property.append(list[1][j])
-                    dict_for_write.append(dict_item)
-                else:
-                    for k in range(len(dict_for_write)):
-                        if dict_for_write[k]["name"] == dict_item["name"]:
-                            dict_for_write[k]["sum"] =  dict_for_write[k]["sum"] + 1
-                            break
+from PySide6.QtGui import QCloseEvent, QPixmap, QPalette, QAction
 
 
+    
 
 class Form_perk(QWidget):
     def __init__(self, parent=None):
@@ -517,42 +491,56 @@ class Window(QMainWindow):
         self.setPalette(palette)
         change_act = QAction("Сменить окно", self) 
         change_act.triggered.connect(changer.change)
+        load_act = QAction("Загрузить из файла", self) 
+        load_act.triggered.connect(lambda:  load_file(List_inv, Table_in))
         self.showMaximized()
         self.setWindowIcon(icon)
         self.menu = self.menuBar()
         self.menu.addMenu("Справка")
-        self.menu.addMenu("Загрузка из файла")
+        self.menu.addAction(load_act)
         self.menu.addAction(change_act)
         # showing all the widgets
         self.setCentralWidget(changer)
         self.show() 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        save_file(List_inv)
 
 
 if __name__ == '__main__':
-    # Create the Qt Application
+    # Создания приложения
     app = QApplication(sys.argv)
-    #inventory list
+    # Создание листов для инвентаря и таблицы расчёта зелий 
+    global List_inv
     List_inv = []
     List_prop_dict = []
     List_prop = []
     List_perk = [15,0,0,0,0,0]
-    # Create and show the form
+    # Создание форм для поиска ингредиента
     search_ingredient = Form_ingredient()
     Search_property = Form_property()
+    # создание таблицы, в которой указаны возможные зелья 
     Table_p = Table_potion()
+    # создание формы, для считывания характеристик для расчёта
     Form_skill = Form_perk()
+    # создание таблицы инвентаря
     Table_in = Table_inv(List_inv)
+    # листа со всеми виджетами
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
+    # Создание объекта отвечающего за расположение виджетов в калькуляторе
     Layout = math_page(list_widget)
+    # Лист для смешивания в игре
     Mix_ingedients = ["black","black"]
+    #создание таблиц для выбора ингредиента
     Table_ingredients = Table_game(0)
     Table_ingredients_2 = Table_game(1)
+    #Создание  интерфейса для взаимодействия с игрой
     Mix = mixing_game()
     List_game_widget = [Table_ingredients ,  Mix, Table_ingredients_2]
+    #Создание объекта отвечающего за расположение виджетов на окне игры
     Layout_game_page = game_page(List_game_widget)
     List_page = [Layout, Layout_game_page]
+    # создания объекта для смены окон(калькулятора и игры)
     changer = changer_page(List_page)
-
-    # Run the main Qt loop
+    # Создание окна
     main_menu = Window()
     sys.exit(app.exec())

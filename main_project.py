@@ -1,7 +1,7 @@
 import sys
 from search import search_by_ingredient, Search_by_property
 from search_description_potion import get_description, get_amount
-from test import get_property, count_above_one, add_property, load_file, save_file
+from secondary_function import get_property, count_above_one, add_property, load_file, save_file
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
     QVBoxLayout, QDialog, QTableWidget, QWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt, QSize
@@ -489,6 +489,8 @@ class Window(QMainWindow):
         palette = QPalette()
         palette.setBrush(QPalette.ColorRole.Window, bkgnd)
         self.setPalette(palette)
+        help_act = QAction("Справка", self) 
+        help_act.triggered.connect(self.open_help)
         change_act = QAction("Сменить окно", self) 
         change_act.triggered.connect(changer.change)
         load_act = QAction("Загрузить из файла", self) 
@@ -496,12 +498,44 @@ class Window(QMainWindow):
         self.showMaximized()
         self.setWindowIcon(icon)
         self.menu = self.menuBar()
-        self.menu.addMenu("Справка")
+        self.menu.addAction(help_act)
         self.menu.addAction(load_act)
         self.menu.addAction(change_act)
         # showing all the widgets
         self.setCentralWidget(changer)
-        self.show() 
+        self.show()
+    def open_help(self):
+        Help_dialog = QDialog()
+        self.correct_help = 0
+        Help_layout = QVBoxLayout()
+        Text_help = QLabel()
+        Text_help.setText("Test")
+        Help_layout.addWidget(Text_help)
+        Button_layout = QHBoxLayout()
+        Ok_button = QPushButton("Выход")
+        next_button = QPushButton("След. стр.")
+        perv_button = QPushButton("Пред. стр.")
+        Button_layout.addWidget(perv_button)
+        Button_layout.addWidget(Ok_button)
+        Button_layout.addWidget(next_button)
+        Ok_button.clicked.connect(Help_dialog.accept)
+        next_button.clicked.connect(lambda: self.swap_help(Text_help,   1))
+        next_button.clicked.connect(lambda: self.swap_help(Text_help,  -1))
+        Help_layout.addLayout(Button_layout)
+        Help_dialog.setLayout(Help_layout)
+        Help_dialog.exec()
+
+
+    def swap_help(self, label, inc):
+        self.correct_help += inc
+        Text = ["Adawodmawiofioawnfioawnfioanwfioanwionaiofnoifniowanfioawnfoianwf", "nwaoifnioawnfioawfoiajwfioajfwoiafj", "lfanwofinaiownfioan"]
+        if self.correct_help < 0:
+            self.correct_help = 0
+        if self.correct_help > len(Text):
+            self.correct_help = len(Text)
+        label.setText(str(self.correct_help))
+        
+
     def closeEvent(self, event: QCloseEvent) -> None:
         save_file(List_inv)
 

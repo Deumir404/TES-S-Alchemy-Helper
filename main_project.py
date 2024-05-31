@@ -481,7 +481,9 @@ class changer_page(QStackedWidget):
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
-        self.setWindowTitle("TES:S alchemy helper") 
+        self.setWindowTitle("TES:S alchemy helper")
+        self.correct_help = 0
+        self.Text = ["Adawodmawiofioawnfioawnfioanwfioanwionaiofnoifniowanfioawnfoianwf", "nwaoifnioawnfioawfoiajwfioajfwoiafj", "lfanwofinaiownfioan"]
         bkgnd = QPixmap("res/main_window.jpg")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         icon = QPixmap("res/main_icon.png")
@@ -506,10 +508,9 @@ class Window(QMainWindow):
         self.show()
     def open_help(self):
         Help_dialog = QDialog()
-        self.correct_help = 0
         Help_layout = QVBoxLayout()
         Text_help = QLabel()
-        Text_help.setText("Test")
+        Text_help.setText(self.Text[self.correct_help])
         Help_layout.addWidget(Text_help)
         Button_layout = QHBoxLayout()
         Ok_button = QPushButton("Выход")
@@ -520,20 +521,19 @@ class Window(QMainWindow):
         Button_layout.addWidget(next_button)
         Ok_button.clicked.connect(Help_dialog.accept)
         next_button.clicked.connect(lambda: self.swap_help(Text_help,   1))
-        next_button.clicked.connect(lambda: self.swap_help(Text_help,  -1))
+        perv_button.clicked.connect(lambda: self.swap_help(Text_help,  -1))
         Help_layout.addLayout(Button_layout)
         Help_dialog.setLayout(Help_layout)
         Help_dialog.exec()
 
 
     def swap_help(self, label, inc):
-        self.correct_help += inc
-        Text = ["Adawodmawiofioawnfioawnfioanwfioanwionaiofnoifniowanfioawnfoianwf", "nwaoifnioawnfioawfoiajwfioajfwoiafj", "lfanwofinaiownfioan"]
+        self.correct_help = self.correct_help + inc
         if self.correct_help < 0:
             self.correct_help = 0
-        if self.correct_help > len(Text):
-            self.correct_help = len(Text)
-        label.setText(str(self.correct_help))
+        if self.correct_help > len(self.Text)-1:
+            self.correct_help = len(self.Text)-1
+        label.setText(str(self.Text[self.correct_help]))
         
 
     def closeEvent(self, event: QCloseEvent) -> None:

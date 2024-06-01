@@ -1,23 +1,16 @@
 import sys
-from search_property import Search_by_property
-from search_ingredient import search_by_ingredient
+from search import search_by_ingredient, Search_by_property
 from search_description_potion import get_description, get_amount
-from test import get_property
+from secondary_function import get_property, count_above_one, add_property, load_file, save_file
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QComboBox, QApplication,
-    QVBoxLayout, QDialog, QTableWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
+    QVBoxLayout, QDialog, QTableWidget, QWidget,  QLabel, QStackedWidget, QListWidget, QHBoxLayout, QTableWidgetItem , QMainWindow, QGridLayout)
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QPixmap, QPalette, QAction
-
-def count_above_two(dict):
-    count = 0
-    for i in range(len(dict)):
-        if dict[i]["sum"] > 1:
-            count += 1
-    return count
+from PySide6.QtGui import QCloseEvent, QPixmap, QPalette, QAction
 
 
+    
 
-class Form_perk(QDialog):
+class Form_perk(QWidget):
     def __init__(self, parent=None):
         super(Form_perk, self).__init__(parent)
         # Create widgets
@@ -90,7 +83,7 @@ class Form_perk(QDialog):
         except ValueError:
             print("Введите числовое значения")
             self.edit_alchemy.setText("15")
-class Form_property(QDialog):
+class Form_property(QWidget):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
         # Create widgets
@@ -122,7 +115,7 @@ class Form_property(QDialog):
         if item_with_amount not in List_inv:
             List_inv.append(item_with_amount)
             Table_in.update_table(List_inv)
-class Form_ingredient(QDialog):
+class Form_ingredient(QWidget):
     def __init__(self, parent=None):
         super(Form_ingredient, self).__init__(parent)
         # Create widgets
@@ -155,7 +148,7 @@ class Form_ingredient(QDialog):
             self.List_result.addItem(list_result)
         else :
             self.List_result.addItems(list_result)
-class Table_potion(QDialog):
+class Table_potion(QWidget):
     def __init__(self, parent=None):
         super(Table_potion, self).__init__(parent)
         # Create widgets
@@ -172,7 +165,7 @@ class Table_potion(QDialog):
         self.table.clear()
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Название","Ингредиенты", "Свойства", "Количество", "Стоимость"])
-        self.table.setRowCount(count_above_two(list))
+        self.table.setRowCount(count_above_one(list))
         correct_row = 0
         for i in range(len(list)):
             if list[i]["sum"] > 1:
@@ -188,22 +181,15 @@ class Table_potion(QDialog):
                 item_sum = QTableWidgetItem(str(get_amount(List_inv, list[i]["name"])))
                 item_disctiption = QTableWidgetItem(description[0])
                 item_cost = QTableWidgetItem(str(description[1]))
-                item.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_prop.setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_disctiption.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_sum.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                item_cost.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-                self.table.setItem(correct_row,4, item_cost)
-                self.table.setItem(correct_row,0, item)
-                self.table.setItem(correct_row,1, item_prop)
-                self.table.setItem(correct_row,2, item_disctiption)
-                self.table.setItem(correct_row,3, item_sum)
+                list_items  = [item, item_prop, item_disctiption, item_sum, item_cost]
+                for i in range(len(list_items)):
+                    list_items[i].setFlags( Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                    self.table.setItem(correct_row,i, list_items[i])
                 correct_row += 1
-
         self.table.resizeColumnToContents(1)
         self.table.resizeColumnToContents(2)
         self.table.resizeRowsToContents()  
-class Table_inv(QDialog):
+class Table_inv(QWidget):
     def __init__(self, list_ing, parent=None):
         super(Table_inv, self).__init__(parent)
         # Create widgets
@@ -275,9 +261,9 @@ class Table_inv(QDialog):
         except ValueError:
             print("Введи нормальные значения")
             self.table.item(item_row, 2).setText("1")
-class main_page(QDialog):
+class math_page(QWidget):
     def __init__(self, list_form, parent=None):
-        super(main_page, self).__init__(parent)
+        super(math_page, self).__init__(parent)
         # Create widgets
         layout = QHBoxLayout()
         for i in range(2):
@@ -300,28 +286,145 @@ class main_page(QDialog):
         True_layout.addLayout(layout_vertical_potion, 1, 2) 
         self.setLayout(True_layout)
 
-class mixing_game(QDialog):
+class mixing_game(QWidget):
     def __init__(self, parent=None):
         super(mixing_game, self).__init__(parent)
-        goal = get_property()
+        self.goal = get_property()
         self.attemp = 5
-        self.label_goal = QLabel(f"Нужно смешать: \n Зелье {goal.lower()}")
+        self.label_goal = QLabel(f"Нужно смешать: \n Зелье {self.goal.lower()}")
         self.label_attemp = QLabel(f"Осталось попыток: {self.attemp}")
         self.image = QLabel()
         self.image.setPixmap(QPixmap("res/table.jpg").scaled(QSize(400,400)))
         self.button_mix = QPushButton("Смешать")
         self.button_clear = QPushButton("Очистить выбор")
+        self.button_reset = QPushButton("Перезапуск")
+        self.choice_ingredient = QHBoxLayout()
+        self.choice_ingredient.setSpacing(0)
+        self.first_ingredient = QLabel()
+        self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        self.second_ingredient = QLabel()
+        self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+        self.choice_ingredient.addWidget(self.first_ingredient)
+        Plus = QLabel("+")
+        Plus.setStyleSheet("font-size: 64px")
+        Plus.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.choice_ingredient.addWidget(Plus)
+        self.choice_ingredient.addWidget(self.second_ingredient)
+        self.choice_ingredient.setSpacing(0)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label_goal)
         self.layout.addWidget(self.label_attemp)
         self.layout.addWidget(self.image)
+        self.layout.addLayout(self.choice_ingredient)
         self.layout.addWidget(self.button_mix)
         self.layout.addWidget(self.button_clear)
+        self.layout.addWidget(self.button_reset)
         self.setLayout(self.layout)
-class Table_game(QDialog):
-    def __init__(self, parent=None):
+        self.button_reset.clicked.connect(self.reset_game)
+        self.button_mix.clicked.connect(self.mix_ingredients)
+        self.button_clear.clicked.connect(self.clear_list)
+    def reset_game(self):
+        self.goal = get_property()
+        self.label_goal.setText(f"Нужно смешать: \n Зелье {self.goal.lower()}")
+        self.attemp = 5
+        self.label_attemp.setText(f"Осталось попыток: {self.attemp}")
+        self.clear_list()
+    def mix_ingredients(self):
+        Message = QLabel()
+        if "black" in Mix_ingedients or "black" in Mix_ingedients or (Mix_ingedients[0] == Mix_ingedients[1]):
+            Message_Text = "Пожалуйста, выберете 2  разных ингредиента"
+            Message_title = "Ошибка"
+            self.result = 0
+        else :
+            
+            list_property_dict_game = []
+            item_property = search_by_ingredient(Mix_ingedients[0])
+            add_property(item_property, list_property_dict_game)
+            item_property = search_by_ingredient(Mix_ingedients[1])
+            add_property(item_property, list_property_dict_game)
+            Checker = count_above_one(list_property_dict_game)
+            if Checker == 0:
+                Message_Text = "У вас ничего не получилось"
+                Message_title = "Ошибка"
+                self.result = 1
+            elif Checker == 1:
+                for i in range(len(list_property_dict_game)):
+                    if list_property_dict_game[i]["sum"] > 1:
+                        prop = list_property_dict_game[i]["name"]
+                        break
+                Message_Text = f"У вас получилось зелье {prop.lower()}"
+                if self.goal == prop:
+                    Message_Text = Message_Text + "\n Вы сварили правильное зелье!!!"
+                    Message_title = "Победа"
+                    self.result = 2
+                else:
+                    Message_Text = Message_Text + "\n Но это неправильное зелье"
+                    Message_title = "Ошибка"
+                    self.result = 1
+            else:
+                prop = []
+                for i in range(len(list_property_dict_game)):
+                    if list_property_dict_game[i]["sum"] > 1:
+                        prop.append(list_property_dict_game[i]["name"])
+                Message_Text = "У вас получилось смешанное зелье со следующими эффектами: \n"
+                for i in range(len(prop)):
+                    Message_Text = Message_Text + f"{prop[i]} \n"
+                if self.goal in prop:
+                    Message_Text = Message_Text + "\n Вы сварили правильное зелье!!!"
+                    Message_title = "Победа"
+                    self.result = 2
+                else:
+                    Message_Text = Message_Text + "\n Но это неправильное зелье"
+                    Message_title = "Ошибка"
+                    self.result = 1
+        Message.setText(Message_Text)
+        Button_OK = QPushButton("OK")
+        Finish = QDialog()
+        Finish.setWindowTitle(Message_title)
+        layout_message = QVBoxLayout()
+        layout_message.addWidget(Message)
+        layout_message.addWidget(Button_OK)
+        Finish.setLayout(layout_message)
+        Button_OK.clicked.connect(Finish.accept)
+        Finish.finished.connect(self.finish_result)
+        Finish.exec()
+    def finish_result(self):
+        if self.result == 0 :
+            pass
+        elif self.result == 1:
+            self.attemp = self.attemp - 1
+            self.label_attemp.setText(f"Осталось попыток: {self.attemp}")
+            if self.attemp == 0:
+                Message = QLabel("Вы проиграли!\n Попробуйте ещё раз")
+                Button_OK = QPushButton("OK")
+                Finish = QDialog()
+                Finish.setWindowTitle("Игра окончена")
+                layout_message = QVBoxLayout()
+                layout_message.addWidget(Message)
+                layout_message.addWidget(Button_OK)
+                Finish.setLayout(layout_message)
+                Button_OK.clicked.connect(Finish.accept)
+                Finish.finished.connect(self.finish_result)
+                Finish.exec()
+                self.reset_game()
+        elif self.result == 2:
+            self.reset_game()
+    def clear_list(self):
+        Mix_ingedients[0] = "black"
+        Mix_ingedients[1] = "black"
+        self.reset_image()
+    def reset_image(self):
+        self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
+        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+class Table_game(QWidget):
+    def __init__(self, num, parent=None):
         super(Table_game, self).__init__(parent)
         # Create widgets
+        self.number = num
         self.table = QTableWidget()
         self.table.setColumnCount(3)
         # Create layout and add widgets
@@ -330,6 +433,7 @@ class Table_game(QDialog):
         # Set dialog layout
         self.setLayout(layout)
         self.fill_table()
+        self.table.cellDoubleClicked.connect(self.add_ingredients)
     def fill_table(self):
         correct = 0
         list_ingredients = search_by_ingredient("")
@@ -338,7 +442,6 @@ class Table_game(QDialog):
                 for j in range(3):
                     if correct == len(list_ingredients):
                         break
-                    # ingredient_name = list_ingredients[correct]
                     ingredient = QLabel()
                     ingredient.setTextFormat(Qt.TextFormat.RichText)
                     ingredient.setText(f"<img src=\"res/image/{list_ingredients[correct]}.png\" width = \"120\" height = \"120\"> <br>{list_ingredients[correct]}</br>")
@@ -348,7 +451,13 @@ class Table_game(QDialog):
                     self.table.horizontalHeader().hide()
                     self.table.resizeColumnsToContents()
                     self.table.resizeRowsToContents()
-class game_page(QDialog):
+    def add_ingredients(self):
+        item = self.table.currentIndex()
+        ingredient = self.table.cellWidget(item.row(), item.column()).text().split("<br>")[1]
+        ingredient = ingredient.split("</br>")[0]
+        Mix_ingedients[self.number] = ingredient
+        Mix.reset_image()
+class game_page(QWidget):
     def __init__(self, list_form, parent=None):
         super(game_page, self).__init__(parent)
         # Create widgets
@@ -372,12 +481,9 @@ class changer_page(QStackedWidget):
 class Window(QMainWindow): 
     def __init__(self): 
         super().__init__() 
-        # setting title 
-        self.setWindowTitle("TES:S alchemy helper") 
-        # setting geometry 
-        self.setGeometry(100, 100, 600, 400)
-        #self.setStyleSheet("Background-image: url(main_window.png);") 
-        # calling method
+        self.setWindowTitle("TES:S alchemy helper")
+        self.correct_help = 0
+        self.Text = ["Adawodmawiofioawnfioawnfioanwfioanwionaiofnoifniowanfioawnfoianwf", "nwaoifnioawnfioawfoiajwfioajfwoiafj", "lfanwofinaiownfioan"]
         bkgnd = QPixmap("res/main_window.jpg")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         icon = QPixmap("res/main_icon.png")
@@ -385,43 +491,90 @@ class Window(QMainWindow):
         palette = QPalette()
         palette.setBrush(QPalette.ColorRole.Window, bkgnd)
         self.setPalette(palette)
+        help_act = QAction("Справка", self) 
+        help_act.triggered.connect(self.open_help)
         change_act = QAction("Сменить окно", self) 
         change_act.triggered.connect(changer.change)
+        load_act = QAction("Загрузить из файла", self) 
+        load_act.triggered.connect(lambda:  load_file(List_inv, Table_in))
         self.showMaximized()
         self.setWindowIcon(icon)
         self.menu = self.menuBar()
-        self.menu.addMenu("Справка")
-        self.menu.addMenu("Загрузка из файла")
+        self.menu.addAction(help_act)
+        self.menu.addAction(load_act)
         self.menu.addAction(change_act)
         # showing all the widgets
         self.setCentralWidget(changer)
-        self.show() 
+        self.show()
+    def open_help(self):
+        Help_dialog = QDialog()
+        Help_layout = QVBoxLayout()
+        Text_help = QLabel()
+        Text_help.setText(self.Text[self.correct_help])
+        Help_layout.addWidget(Text_help)
+        Button_layout = QHBoxLayout()
+        Ok_button = QPushButton("Выход")
+        next_button = QPushButton("След. стр.")
+        perv_button = QPushButton("Пред. стр.")
+        Button_layout.addWidget(perv_button)
+        Button_layout.addWidget(Ok_button)
+        Button_layout.addWidget(next_button)
+        Ok_button.clicked.connect(Help_dialog.accept)
+        next_button.clicked.connect(lambda: self.swap_help(Text_help,   1))
+        perv_button.clicked.connect(lambda: self.swap_help(Text_help,  -1))
+        Help_layout.addLayout(Button_layout)
+        Help_dialog.setLayout(Help_layout)
+        Help_dialog.exec()
+
+
+    def swap_help(self, label, inc):
+        self.correct_help = self.correct_help + inc
+        if self.correct_help < 0:
+            self.correct_help = 0
+        if self.correct_help > len(self.Text)-1:
+            self.correct_help = len(self.Text)-1
+        label.setText(str(self.Text[self.correct_help]))
+        
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        save_file(List_inv)
 
 
 if __name__ == '__main__':
-    # Create the Qt Application
+    # Создания приложения
     app = QApplication(sys.argv)
-    #inventory list
+    # Создание листов для инвентаря и таблицы расчёта зелий 
+    global List_inv
     List_inv = []
     List_prop_dict = []
     List_prop = []
     List_perk = [15,0,0,0,0,0]
-    # Create and show the form
+    # Создание форм для поиска ингредиента
     search_ingredient = Form_ingredient()
     Search_property = Form_property()
+    # создание таблицы, в которой указаны возможные зелья 
     Table_p = Table_potion()
+    # создание формы, для считывания характеристик для расчёта
     Form_skill = Form_perk()
+    # создание таблицы инвентаря
     Table_in = Table_inv(List_inv)
+    # листа со всеми виджетами
     list_widget = [search_ingredient, Search_property, Table_in, Table_p, Form_skill]
-    Layout = main_page(list_widget)
-    Table_ingredients = Table_game()
-    Table_ingredients_2 = Table_game()
+    # Создание объекта отвечающего за расположение виджетов в калькуляторе
+    Layout = math_page(list_widget)
+    # Лист для смешивания в игре
+    Mix_ingedients = ["black","black"]
+    #создание таблиц для выбора ингредиента
+    Table_ingredients = Table_game(0)
+    Table_ingredients_2 = Table_game(1)
+    #Создание  интерфейса для взаимодействия с игрой
     Mix = mixing_game()
     List_game_widget = [Table_ingredients ,  Mix, Table_ingredients_2]
+    #Создание объекта отвечающего за расположение виджетов на окне игры
     Layout_game_page = game_page(List_game_widget)
     List_page = [Layout, Layout_game_page]
+    # создания объекта для смены окон(калькулятора и игры)
     changer = changer_page(List_page)
-
-    # Run the main Qt loop
+    # Создание окна
     main_menu = Window()
     sys.exit(app.exec())

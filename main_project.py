@@ -30,9 +30,6 @@ class Form_perk(QWidget):
         self.label_poisoner = QLabel("Отравитель")
         self.edit_poisoner = QComboBox()
         self.edit_poisoner.addItems(List_bool)
-        self.label_purity = QLabel("Чистота")
-        self.edit_purity = QComboBox()
-        self.edit_purity.addItems(List_bool)
         # Create layout and add widgets
         layout_alchemy =QHBoxLayout()
         layout_alchemy.addWidget(self.label_alchemy)
@@ -49,16 +46,12 @@ class Form_perk(QWidget):
         layout_poisoner =QHBoxLayout()
         layout_poisoner.addWidget(self.label_poisoner)
         layout_poisoner.addWidget(self.edit_poisoner)
-        layout_purity =QHBoxLayout()
-        layout_purity.addWidget(self.label_purity)
-        layout_purity.addWidget(self.edit_purity)
         layout = QVBoxLayout()
         layout.addLayout(layout_alchemy)
         layout.addLayout(layout_alchemist)
         layout.addLayout(layout_healer)
         layout.addLayout(layout_pharmacist)
         layout.addLayout(layout_poisoner)
-        layout.addLayout(layout_purity)
         # Set dialog layout
         self.setLayout(layout)
         #Привязываем редактирование навыков к функции
@@ -67,7 +60,6 @@ class Form_perk(QWidget):
         self.edit_healer.currentIndexChanged.connect(self.change_perk)
         self.edit_pharmacist.currentIndexChanged.connect(self.change_perk)
         self.edit_poisoner.currentIndexChanged.connect(self.change_perk)
-        self.edit_purity.currentIndexChanged.connect(self.change_perk)
     def change_perk(self):
         try :
             if int(self.edit_alchemy.text()) >= 0:
@@ -78,11 +70,12 @@ class Form_perk(QWidget):
             List_perk[2] = self.edit_healer.currentIndex()
             List_perk[3] = self.edit_pharmacist.currentIndex()
             List_perk[4] = self.edit_poisoner.currentIndex()
-            List_perk[5] = self.edit_purity.currentIndex()
+            List_perk[5] = "0"
             Table_p.fill_table(List_prop_dict)
         except ValueError:
             print("Введите числовое значения")
             self.edit_alchemy.setText("15")
+            Table_p.fill_table(List_prop_dict)
 class Form_property(QWidget):
     def __init__(self, parent=None):
         super(Form_property, self).__init__(parent)
@@ -111,6 +104,8 @@ class Form_property(QWidget):
             self.List_result.addItems(list_result)
     def add_ingredients(self):
         item = self.List_result.currentItem()
+        if (item.text() == "Ингредиент не найден") or (item.text() == "Файл с ингредиентами не найден"):
+            return 0
         item_with_amount = [item.text(), 1]
         if item_with_amount not in List_inv:
             List_inv.append(item_with_amount)
@@ -120,7 +115,7 @@ class Form_ingredient(QWidget):
         super(Form_ingredient, self).__init__(parent)
         # Create widgets
         self.edit = QLineEdit()
-        self.button = QPushButton("Поиск свойств")
+        self.button = QPushButton("Поиск по названию")
         self.result_str = QLabel("Результаты")
         self.List_result = QListWidget()
         self.result()
@@ -137,6 +132,8 @@ class Form_ingredient(QWidget):
         self.List_result.itemDoubleClicked.connect(self.add_ingredients)
     def add_ingredients(self):
         item = self.List_result.currentItem()
+        if (item.text() == "Ингредиент не найден") or (item.text() == "Файл с ингредиентами не найден"):
+            return 0
         item_with_amount = [item.text(), 1]
         if item_with_amount not in List_inv:
             List_inv.append(item_with_amount)
@@ -301,11 +298,8 @@ class mixing_game(QWidget):
         self.choice_ingredient = QHBoxLayout()
         self.choice_ingredient.setSpacing(0)
         self.first_ingredient = QLabel()
-        self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
-        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
         self.second_ingredient = QLabel()
-        self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
-        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+        self.reset_image()
         self.choice_ingredient.addWidget(self.first_ingredient)
         Plus = QLabel("+")
         Plus.setStyleSheet("font-size: 64px")
@@ -417,9 +411,15 @@ class mixing_game(QWidget):
         self.reset_image()
     def reset_image(self):
         self.first_ingredient.setTextFormat(Qt.TextFormat.RichText)
-        self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        if Mix_ingedients[0] != "black" :
+            self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[0]}</br>")
+        else: 
+            self.first_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[0]}.png\" width = \"120\" height = \"120\"> <br> </br>")
         self.second_ingredient.setTextFormat(Qt.TextFormat.RichText)
-        self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+        if Mix_ingedients[1] != "black" :
+            self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"> <br>{Mix_ingedients[1]}</br>")
+        else :
+            self.second_ingredient.setText(f"<img src=\"res/image/{Mix_ingedients[1]}.png\" width = \"120\" height = \"120\"><br> </br>")
 class Table_game(QWidget):
     def __init__(self, num, parent=None):
         super(Table_game, self).__init__(parent)
@@ -483,7 +483,10 @@ class Window(QMainWindow):
         super().__init__() 
         self.setWindowTitle("TES:S alchemy helper")
         self.correct_help = 0
-        self.Text = ["Adawodmawiofioawnfioawnfioanwfioanwionaiofnoifniowanfioawnfoianwf", "nwaoifnioawnfioawfoiajwfioajfwoiafj", "lfanwofinaiownfioan"]
+        self.Text_help = [
+            "Правила игры: \nИгрок должен смешать какие-либо 2 ингредиента (два одинаковых ингредиента смешивать нельзя), чтобы получить зелье с загаданным эффектом. \nДля этого даётся 5 попыток. \nЕсли попытки кончились, то игрок проигрывает. \nЭффект выбирает компьютер случайно из файла с эффектами.",
+            "Основные функции калькулятора: \nКалькулятор вычисляет характеристики зелья на основе характеристик игрока, характеристики зелья из возможных совпадают с харатеристиками игры\nСтоимость зелья, рассчитана без учёта навыка торговли. \nДобавить предмет в инвентарь нужно дважды нажать на ингредиент в результатах\nЧтобы удалить предмет из инвентаря нужно дважды нажать на ингредиент в таблице инвентаря\nСохранение инвентаря происходит автоматически при выходе из игры\nВсе ингредиенты актуальны для версии TES:Skyrim LE"
+        ]
         bkgnd = QPixmap("res/main_window.jpg")
         bkgnd.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio)
         icon = QPixmap("res/main_icon.png")
@@ -508,9 +511,10 @@ class Window(QMainWindow):
         self.show()
     def open_help(self):
         Help_dialog = QDialog()
+        Help_dialog.setWindowTitle("Справка")
         Help_layout = QVBoxLayout()
         Text_help = QLabel()
-        Text_help.setText(self.Text[self.correct_help])
+        Text_help.setText(self.Text_help[self.correct_help])
         Help_layout.addWidget(Text_help)
         Button_layout = QHBoxLayout()
         Ok_button = QPushButton("Выход")
@@ -531,9 +535,9 @@ class Window(QMainWindow):
         self.correct_help = self.correct_help + inc
         if self.correct_help < 0:
             self.correct_help = 0
-        if self.correct_help > len(self.Text)-1:
-            self.correct_help = len(self.Text)-1
-        label.setText(str(self.Text[self.correct_help]))
+        if self.correct_help > len(self.Text_help)-1:
+            self.correct_help = len(self.Text_help)-1
+        label.setText(str(self.Text_help[self.correct_help]))
         
 
     def closeEvent(self, event: QCloseEvent) -> None:

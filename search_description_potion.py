@@ -51,7 +51,7 @@ def get_description(text, lvl, alchemy, healer,farma,poison):
                     description = list[0] + str(power) + list[1]
                 else :
                     if len(list_dur) == 2:
-                        power = round(basic_power * mult_power)
+                        power = basic_power
                         duration = round(basic_duration* mult_power)
                         description = list_dur[0] + str(duration) + list_dur[1]
                     else:

@@ -104,7 +104,7 @@ class Form_property(QWidget):
             self.List_result.addItems(list_result)
     def add_ingredients(self):
         item = self.List_result.currentItem()
-        if (item.text() == "Ингредиент не найден") or (item.text() == "Файл с ингредиентами не найден"):
+        if (item.text() == "Ингредиенты не найдены") or (item.text() == "Файл с ингредиентами не найден"):
             return 0
         item_with_amount = [item.text(), 1]
         if item_with_amount not in List_inv:
@@ -291,7 +291,7 @@ class mixing_game(QWidget):
         self.label_goal = QLabel(f"Нужно смешать: \n Зелье {self.goal.lower()}")
         self.label_attemp = QLabel(f"Осталось попыток: {self.attemp}")
         self.image = QLabel()
-        self.image.setPixmap(QPixmap("res/table.jpg").scaled(QSize(400,400)))
+        self.image.setPixmap(QPixmap("res/table.png").scaled(QSize(400,400)))
         self.button_mix = QPushButton("Смешать")
         self.button_clear = QPushButton("Очистить выбор")
         self.button_reset = QPushButton("Перезапуск")

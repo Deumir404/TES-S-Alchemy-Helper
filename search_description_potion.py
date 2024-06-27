@@ -72,7 +72,6 @@ def get_description(text, lvl, alchemy, healer,farma,poison):
 def sort_comparator(list):
     return list[1]
 def get_amount(list, name):
-    #есть баг
     sort_list = []
     for i in range(len(list)):
         list_property = search_by_ingredient(list[i][0])

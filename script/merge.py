@@ -5,36 +5,32 @@
 
 import json
 
-def write_json(data, filename= 'alchemy_with_tags.json'):
+def write_json(data, filename= 'ingredients_full.json'):
     with open(filename, 'a+', encoding= "UTF-8") as file:
         json.dump(data, file, indent=2, ensure_ascii=False)
 
 def merge():
-        dict_1 = []
-        dict_2 = []
-        list_dict = []
-        with open("alchemy_with_base.json", 'r', encoding= "UTF-8") as file:
-                file_content = file.read()
-                dict_1.append(json.loads(file_content))
-        with open("merge_alchemy.json", 'r', encoding= "UTF-8") as file:
-                file_content = file.read()
-                dict_2.append(json.loads(file_content))
-        for i in range(len(dict_1[0])):
-                name = dict_1[0][i].get("name_potion")
-                base_cost1 = dict_1[0][i].get("base_cost")
-                base_power1 = dict_1[0][i].get("base_power")
-                power1 = dict_1[0][i].get("base_duration")
-                for j in range(len(dict_2[0])):
-                  name2 = dict_2[0][j].get("name_potion")
-                  if name == name2:
-                        description1 = dict_2[0][j].get("description")
-                        tag1 = dict_2[0][j].get("tag")
-                data = dict(name_potion = name, description = description1, tag = tag1, base_cost = float(base_cost1), base_power = int(base_power1), base_duration = int(power1))
-                print(data)
-                list_dict.append(data)
+        dict_for_write = []
+        dict_for_read = []
+        lenght = 0
+        for i in range(3):
+                if i == 0 : continue
+                with open(f"ingredients{i}.json", 'r', encoding= "UTF-8") as file:
+                        file_content = file.read()
+                        dict_for_read.append(json.loads(file_content))
+                lenght += len(dict_for_read[0])
+                print(lenght)
+                for j in range(len(dict_for_read[0])):
+                        name = dict_for_read[0][j].get("name_ingredient")
+                        prop = dict_for_read[0][j].get("properties_json")
+                        data = dict(name_ingredient = name, properties_json = prop)
+                        dict_for_write.append(data)
+                dict_for_read.clear()
                 
-        
-        write_json(list_dict)
+        print(lenght)
+        print(len(dict_for_write))
+        write_json(dict_for_write)
+
                 
 
 

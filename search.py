@@ -4,7 +4,7 @@ import json
 def search_by_ingredient(text):
         dict = []
         try:
-                with open("res/ingredient1.json", 'r', encoding= "UTF-8") as file:
+                with open("res/ingredients_full.json", 'r', encoding= "UTF-8") as file:
                         file_content = file.read()
                         dict.append(json.loads(file_content))
                 item = []
@@ -25,7 +25,7 @@ def search_by_ingredient(text):
 def Search_by_property(text):
         dict = []
         try :
-                with open("res/ingredient1.json", 'r', encoding= "UTF-8") as file:
+                with open("res/ingredients_full.json", 'r', encoding= "UTF-8") as file:
                         file_content = file.read()
                         dict.append(json.loads(file_content))
                 correct_items = []

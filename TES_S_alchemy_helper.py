@@ -437,8 +437,8 @@ class Table_game(QWidget):
     def fill_table(self):
         correct = 0
         list_ingredients = search_by_ingredient("")
-        self.table.setRowCount(len(list_ingredients)//3+1)
-        for i in range(len(list_ingredients)//3+1):
+        self.table.setRowCount(len(list_ingredients)//3)
+        for i in range(len(list_ingredients)//3):
                 for j in range(3):
                     if correct == len(list_ingredients):
                         break
@@ -500,7 +500,6 @@ class Window(QMainWindow):
         change_act.triggered.connect(changer.change)
         load_act = QAction("Загрузить из файла", self) 
         load_act.triggered.connect(lambda:  load_file(List_inv, Table_in))
-        self.showMaximized()
         self.setWindowIcon(icon)
         self.menu = self.menuBar()
         self.menu.addAction(help_act)
@@ -529,8 +528,6 @@ class Window(QMainWindow):
         Help_layout.addLayout(Button_layout)
         Help_dialog.setLayout(Help_layout)
         Help_dialog.exec()
-
-
     def swap_help(self, label, inc):
         self.correct_help = self.correct_help + inc
         if self.correct_help < 0:
@@ -539,7 +536,6 @@ class Window(QMainWindow):
             self.correct_help = len(self.Text_help)-1
         label.setText(str(self.Text_help[self.correct_help]))
         
-
     def closeEvent(self, event: QCloseEvent) -> None:
         save_file(List_inv)
 
